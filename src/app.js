@@ -37,6 +37,11 @@ import { initAlertDetailModal }     from './components/AlertDetailModal.js';
 document.addEventListener('DOMContentLoaded', () => {
   document.title = Config.APP_NAME;
   console.log(`[${Config.APP_NAME}] v${Config.VERSION} inicializado.`);
+
+  // Aplicar tema salvo imediatamente
+  const savedTheme = localStorage.getItem('ef_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
   if (Config.DEMO_MODE) installMocks();
   registerOffHoursPlugin();
   initAlertDetailModal();
