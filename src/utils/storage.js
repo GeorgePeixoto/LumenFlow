@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Wrapper seguro sobre localStorage/sessionStorage.
+﻿/**
+ * LumenFlow — Wrapper seguro sobre localStorage/sessionStorage.
  *
  * Motivação: acesso direto ao storage pode lançar exceções (modo privado em
  * alguns browsers, storage cheio, políticas de segurança). Este wrapper

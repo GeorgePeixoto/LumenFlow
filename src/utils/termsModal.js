@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Modal de Termos de Uso (US01-F3).
+﻿/**
+ * LumenFlow — Modal de Termos de Uso (US01-F3).
  *
  * Decisão de entrega do conteúdo: **inline em JS**.
  * Alternativas consideradas:
@@ -31,11 +31,11 @@ const TERMS_HTML = `
   <p class="terms-version">Versão: ${TERMS_VERSION} &nbsp;·&nbsp; Vigência: 07/05/2026</p>
 
   <h3>1. Aceitação dos Termos</h3>
-  <p>Ao criar uma conta no EnergyFlow, o representante legal da empresa declara ter lido,
+  <p>Ao criar uma conta no LumenFlow, o representante legal da empresa declara ter lido,
   compreendido e concordado integralmente com estes Termos de Uso.</p>
 
   <h3>2. Descrição do Serviço</h3>
-  <p>O EnergyFlow é uma plataforma de gestão de energia elétrica para empresas do setor
+  <p>O LumenFlow é uma plataforma de gestão de energia elétrica para empresas do setor
   atacadista. O serviço permite monitorar o consumo de energia em tempo real por meio de
   sensores IoT, gerar relatórios e receber alertas de consumo.</p>
 
@@ -52,14 +52,14 @@ const TERMS_HTML = `
   <ul>
     <li>Os dados de consumo energético coletados pelos sensores são de propriedade da
     empresa cadastrada.</li>
-    <li>O EnergyFlow utiliza os dados exclusivamente para prestação do serviço contratado.</li>
+    <li>O LumenFlow utiliza os dados exclusivamente para prestação do serviço contratado.</li>
     <li>Dados são armazenados de forma segura e isolados por empresa (multi-tenancy).</li>
     <li>Consulte nossa Política de Privacidade para detalhes sobre tratamento de dados
     pessoais.</li>
   </ul>
 
   <h3>5. Limitações de Responsabilidade</h3>
-  <p>O EnergyFlow não se responsabiliza por decisões operacionais tomadas com base nas
+  <p>O LumenFlow não se responsabiliza por decisões operacionais tomadas com base nas
   informações exibidas na plataforma. Os dados são fornecidos como suporte à tomada de
   decisão, não como substituto de análise técnica especializada.</p>
 
@@ -68,7 +68,7 @@ const TERMS_HTML = `
   por qualquer das partes, mediante aviso prévio.</p>
 
   <h3>7. Alterações nos Termos</h3>
-  <p>O EnergyFlow pode atualizar estes Termos periodicamente. Usuários serão notificados
+  <p>O LumenFlow pode atualizar estes Termos periodicamente. Usuários serão notificados
   sobre alterações relevantes e, quando exigido por lei, será solicitado novo aceite.</p>
 </div>
 `;
@@ -100,7 +100,7 @@ export function openTermsModal({ onAccept, onClose } = {}) {
 
   // ── Modal ─────────────────────────────────────────────────────
   const modal = createModal({
-    title: 'Termos de Uso — EnergyFlow',
+    title: 'Termos de Uso — LumenFlow',
     content: contentEl,
     footer: [closeBtn, acceptBtn],
     size: 'lg',

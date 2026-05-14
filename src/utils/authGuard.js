@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Guard de rotas (US02-F3).
+﻿/**
+ * LumenFlow — Guard de rotas (US02-F3).
  *
  * Fornece dois wrappers de rota:
  *

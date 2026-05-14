@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Alert Badge (US17-F3)
+﻿/**
+ * LumenFlow — Alert Badge (US17-F3)
  *
  * Bell icon with counter badge in AppShell header.
  * Shows dropdown with 5 most recent alerts.

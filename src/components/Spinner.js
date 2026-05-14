@@ -1,5 +1,5 @@
-/**
- * EnergyFlow - Spinner component
+﻿/**
+ * LumenFlow - Spinner component
  *
  * Indicador de loading reutilizavel para telas, tabelas e acoes inline.
  *

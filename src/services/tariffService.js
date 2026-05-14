@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Tariff Service (US10-F3)
+﻿/**
+ * LumenFlow — Tariff Service (US10-F3)
  */
 import { httpClient } from './httpClient.js';
 

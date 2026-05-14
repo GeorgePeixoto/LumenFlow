@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Financial Service (US10)
+﻿/**
+ * LumenFlow — Financial Service (US10)
  */
 import { httpClient } from './httpClient.js';
 

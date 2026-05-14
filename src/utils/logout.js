@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Ação de logout (US02-F4).
+﻿/**
+ * LumenFlow — Ação de logout (US02-F4).
  *
  * Orquestra todas as etapas do logout em um único lugar:
  *   1. POST /api/auth/logout no backend (invalida token no servidor).

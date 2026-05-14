@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — DataTable (F2-F6).
+﻿/**
+ * LumenFlow — DataTable (F2-F6).
  *
  * Tabela genérica com colunas configuráveis, estados de loading/erro/vazio,
  * paginação controlada externamente, ações por linha e colapso mobile para cards.

@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Input component
+﻿/**
+ * LumenFlow — Input component
  *
  * Uso:
  *   import { createInput } from './components/Input.js';

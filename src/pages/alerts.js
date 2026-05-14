@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Alerts Page (US17-F2)
+﻿/**
+ * LumenFlow — Alerts Page (US17-F2)
  *
  * Central de alertas with DataTable, filters, actions, and bulk operations.
  */

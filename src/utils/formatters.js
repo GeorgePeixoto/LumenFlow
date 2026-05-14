@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Formatadores de valores para exibição na UI.
+﻿/**
+ * LumenFlow — Formatadores de valores para exibição na UI.
  *
  * Uso:
  *   import { formatKwh, formatCurrency, formatPercent, formatDate } from './formatters.js';

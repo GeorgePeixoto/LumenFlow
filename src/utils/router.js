@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Hash-based SPA router.
+﻿/**
+ * LumenFlow — Hash-based SPA router.
  *
  * Chosen approach: hash routing (#/login, #/dashboard).
  * Rationale: works with any static server (python -m http.server, php -S, etc.)

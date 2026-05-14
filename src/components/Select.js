@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Select component
+﻿/**
+ * LumenFlow — Select component
  *
  * Uso:
  *   import { createSelect } from './components/Select.js';

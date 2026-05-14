@@ -1,5 +1,5 @@
 ﻿/**
- * EnergyFlow — Mock Installer (Demo Mode).
+ * LumenFlow — Mock Installer (Demo Mode).
  *
  * Substitui os métodos do httpClient por versões que retornam dados mock.
  * Chamado no app.js quando Config.DEMO_MODE === true.
@@ -24,7 +24,7 @@ function delay(ms) {
 }
 
 export function installMocks() {
-  console.log('%c[EnergyFlow] Modo Demo ativo — dados fictícios', 'color: #14b8a6; font-weight: bold;');
+  console.log('%c[LumenFlow] Modo Demo ativo — dados fictícios', 'color: #14b8a6; font-weight: bold;');
 
   // Salva métodos originais (caso precise restaurar)
   const _originalGet = httpClient.get.bind(httpClient);
@@ -79,7 +79,7 @@ export function installMocks() {
     httpClient.put = _originalPut;
     httpClient.patch = _originalPatch;
     httpClient.delete = _originalDelete;
-    console.log('[EnergyFlow] Mocks desinstalados.');
+    console.log('[LumenFlow] Mocks desinstalados.');
   };
 }
 

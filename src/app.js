@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Entry point da aplicacao.
+﻿/**
+ * LumenFlow — Entry point da aplicacao.
  *
  * Inicializa config, router, e monta a pagina adequada.
  */
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Captura global de promises rejeitadas não tratadas (Bug 8)
   window.addEventListener('unhandledrejection', (e) => {
     e.preventDefault();
-    console.warn('[EnergyFlow] Promise não tratada:', e.reason?.message || e.reason);
+    console.warn('[LumenFlow] Promise não tratada:', e.reason?.message || e.reason);
   });
 
   const app = document.getElementById('app');

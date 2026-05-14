@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Firebase Realtime Database Service.
+﻿/**
+ * LumenFlow — Firebase Realtime Database Service.
  *
  * Acessa o RTDB via REST (sem SDK) para manter o bundle leve.
  * Usado em modo demo para exibir dados reais do Wokwi.

@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Alert Polling (US17-F1)
+﻿/**
+ * LumenFlow — Alert Polling (US17-F1)
  *
  * Polls for new critical alerts and shows toast notifications in real-time.
  * Singleton — start/stop from anywhere.

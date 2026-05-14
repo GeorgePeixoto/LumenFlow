@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — PasswordInput component
+﻿/**
+ * LumenFlow — PasswordInput component
  *
  * Input de senha com toggle de visibilidade (cobre US04).
  *

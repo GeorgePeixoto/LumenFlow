@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Textarea component
+﻿/**
+ * LumenFlow — Textarea component
  *
  * Uso:
  *   import { createTextarea } from './components/Textarea.js';

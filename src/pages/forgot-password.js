@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Página de recuperação de senha (US03-F2).
+﻿/**
+ * LumenFlow — Página de recuperação de senha (US03-F2).
  *
  * Formulário com campo de e-mail. Após submit, sempre exibe a mesma mensagem
  * de sucesso — alinhado com a resposta genérica do backend (US03-B1), que não

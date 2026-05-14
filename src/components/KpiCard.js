@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — KpiCard (F2-F4).
+﻿/**
+ * LumenFlow — KpiCard (F2-F4).
  *
  * Card de métrica reutilizável para o dashboard e páginas de relatório.
  *

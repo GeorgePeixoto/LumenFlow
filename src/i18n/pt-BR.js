@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Strings de UI centralizadas em português brasileiro.
+﻿/**
+ * LumenFlow — Strings de UI centralizadas em português brasileiro.
  *
  * REGRA: nenhuma string visível ao usuário deve aparecer diretamente em
  * templates HTML ou código JS. Sempre use t('chave.aninhada').
@@ -19,7 +19,7 @@ const strings = {
 
   // ─── App ──────────────────────────────────────────────────────────────────
   app: {
-    name: 'EnergyFlow',
+    name: 'LumenFlow',
     tagline: 'Gestão inteligente de energia',
   },
 

@@ -1,5 +1,5 @@
 ﻿/**
- * EnergyFlow — Chart wrapper (F4-F1).
+ * LumenFlow — Chart wrapper (F4-F1).
  *
  * Encapsula Chart.js para que o resto do projeto nunca importe a lib diretamente.
  * Se um dia trocar de biblioteca, troca apenas este arquivo.
@@ -140,7 +140,7 @@ export function createChart({
 
   function init() {
     if (typeof Chart === 'undefined') {
-      console.warn('[EnergyFlow] Chart.js not loaded. Charts will not render.');
+      console.warn('[LumenFlow] Chart.js not loaded. Charts will not render.');
       return;
     }
     chartInstance = new Chart(canvas, {

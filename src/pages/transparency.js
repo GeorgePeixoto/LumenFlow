@@ -220,7 +220,7 @@ function createTvOverlay(grid) {
   const company = document.createElement('span');
   company.className = 'tv-overlay__company';
   const user = sessionService.getUser();
-  company.textContent = user?.company_name || 'EnergyFlow';
+  company.textContent = user?.company_name || 'LumenFlow';
   brand.appendChild(company);
   hdr.appendChild(brand);
 

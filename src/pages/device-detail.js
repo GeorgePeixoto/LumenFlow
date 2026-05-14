@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Device Detail Page (US16-F1, US16-F2)
+﻿/**
+ * LumenFlow — Device Detail Page (US16-F1, US16-F2)
  *
  * Shows device info, time-series chart with anomaly highlights,
  * anomaly table with tooltips, and maintenance history.

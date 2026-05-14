@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — AppShell (F2-F1).
+﻿/**
+ * LumenFlow — AppShell (F2-F1).
  *
  * Singleton que gerencia o layout autenticado: header + sidebar + content area.
  * Todas as páginas privadas renderizam dentro do content area, nunca substituem

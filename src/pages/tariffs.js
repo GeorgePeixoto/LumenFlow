@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Tariffs Page (US10-F3)
+﻿/**
+ * LumenFlow — Tariffs Page (US10-F3)
  *
  * DataTable of tariff history, create/edit modal, overlap validation.
  */

@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Alert Service (US17)
+﻿/**
+ * LumenFlow — Alert Service (US17)
  */
 import { httpClient } from './httpClient.js';
 

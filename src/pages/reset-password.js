@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Página de redefinição de senha (US03-F3).
+﻿/**
+ * LumenFlow — Página de redefinição de senha (US03-F3).
  *
  * Recebe ?token=... via query string do hash (#/reset-password?token=abc).
  * Estratégia de validação do token: não há endpoint separado de validação

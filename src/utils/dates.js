@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Utilitários de manipulação de datas.
+﻿/**
+ * LumenFlow — Utilitários de manipulação de datas.
  *
  * Implementação própria (sem date-fns ou moment).
  * Rationale: as operações necessárias (início/fim de mês, diff, ranges)

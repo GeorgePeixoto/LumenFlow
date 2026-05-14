@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Página de cadastro (US01-F1 + US01-F2).
+﻿/**
+ * LumenFlow — Página de cadastro (US01-F1 + US01-F2).
  *
  * US01-F1: layout, campos, máscara CNPJ, checkbox de termos.
  * US01-F2: validações client-side progressivas (blur) + validação final no submit.

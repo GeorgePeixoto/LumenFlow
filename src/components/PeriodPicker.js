@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — PeriodPicker (F2-F7).
+﻿/**
+ * LumenFlow — PeriodPicker (F2-F7).
  *
  * Seletor de período reutilizável para gráficos e relatórios.
  * Presets: Hoje, Últimos 7 dias, Últimos 30 dias, Mês atual, Mês anterior,
@@ -19,7 +19,7 @@
  *
  * Decisão de lib: sem flatpickr ou vanilla-datepicker. Dois <input type="date">
  * nativos cobrem o caso "Personalizado" com acessibilidade built-in e zero
- * dependência externa. Para o B2B desktop-first do EnergyFlow, o date input
+ * dependência externa. Para o B2B desktop-first do LumenFlow, o date input
  * nativo tem UX aceitável. Se um calendário visual for necessário no futuro,
  * pode ser adicionado apenas neste componente sem afetar o resto.
  *

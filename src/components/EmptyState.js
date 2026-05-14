@@ -1,5 +1,5 @@
-/**
- * EnergyFlow - EmptyState component
+﻿/**
+ * LumenFlow - EmptyState component
  *
  * Estado vazio reutilizavel para listas, tabelas e paineis sem dados.
  *

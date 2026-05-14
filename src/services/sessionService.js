@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Session service (US02-F2).
+﻿/**
+ * LumenFlow — Session service (US02-F2).
  *
  * Fachada de alto nível sobre httpClient para verificação e controle
  * de sessão. Código da aplicação (guards, rotas, AppShell) deve importar

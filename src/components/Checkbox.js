@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Checkbox & Radio components
+﻿/**
+ * LumenFlow — Checkbox & Radio components
  *
  * Uso:
  *   import { createCheckbox, createRadio } from './components/Checkbox.js';

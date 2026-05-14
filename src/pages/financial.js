@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Financial Page (US10-F2)
+﻿/**
+ * LumenFlow — Financial Page (US10-F2)
  *
  * KPI cards, daily consumption chart, tariff config link.
  */

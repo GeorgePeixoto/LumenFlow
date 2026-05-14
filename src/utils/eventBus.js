@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Event bus pub/sub para comunicação entre módulos desacoplados.
+﻿/**
+ * LumenFlow — Event bus pub/sub para comunicação entre módulos desacoplados.
  *
  * Usado para eventos globais como auth:expired, toast:show, alert:new.
  * Evita imports circulares e acoplamento direto entre módulos.

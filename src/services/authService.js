@@ -1,5 +1,5 @@
-/**
- * EnergyFlow - Auth service
+﻿/**
+ * LumenFlow - Auth service
  *
  * Fachada inicial para endpoints de autenticacao. As telas de auth vao evoluir
  * estes metodos nas tasks F1, mantendo componentes sem chamadas fetch diretas.

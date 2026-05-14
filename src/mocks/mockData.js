@@ -1,5 +1,5 @@
 ﻿/**
- * EnergyFlow — Mock Data (Demo Mode).
+ * LumenFlow — Mock Data (Demo Mode).
  *
  * Dados fictícios realistas para apresentação.
  * Empresa: TechNova Indústria Ltda.

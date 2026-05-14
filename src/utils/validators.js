@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Validadores reutilizáveis para formulários.
+﻿/**
+ * LumenFlow — Validadores reutilizáveis para formulários.
  *
  * Cada função retorna null (válido) ou string de erro (inválido).
  * Design intencional: componentes de formulário chamam validate(value) e

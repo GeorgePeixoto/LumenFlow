@@ -1,12 +1,12 @@
-/**
- * EnergyFlow — Configuracao centralizada.
+﻿/**
+ * LumenFlow — Configuracao centralizada.
  *
  * Toda URL, feature flag ou constante de ambiente vem daqui.
  * Componentes e services importam este modulo — nunca hardcodam valores.
  */
 const Config = Object.freeze({
   API_BASE_URL: 'http://localhost:8000/api',
-  APP_NAME: 'EnergyFlow',
+  APP_NAME: 'LumenFlow',
   VERSION: '0.1.0',
   DEFAULT_LOCALE: 'pt-BR',
   POLLING_INTERVAL_MS: 30000,

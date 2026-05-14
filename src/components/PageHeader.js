@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — PageHeader (F2-F5).
+﻿/**
+ * LumenFlow — PageHeader (F2-F5).
  *
  * Cabeçalho padrão de toda página interna: breadcrumb, título,
  * descrição e área de ações (botões à direita).

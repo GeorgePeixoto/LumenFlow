@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — debounce e throttle para controle de frequência de chamadas.
+﻿/**
+ * LumenFlow — debounce e throttle para controle de frequência de chamadas.
  *
  * Uso:
  *   import { debounce, throttle } from './debounce.js';

@@ -1,5 +1,5 @@
-/**
- * EnergyFlow - ErrorState component
+﻿/**
+ * LumenFlow - ErrorState component
  *
  * Estado de erro reutilizavel para carregamentos com retry.
  *

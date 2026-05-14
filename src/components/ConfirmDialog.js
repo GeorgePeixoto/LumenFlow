@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — ConfirmDialog component
+﻿/**
+ * LumenFlow — ConfirmDialog component
  *
  * Variante de Modal para confirmacoes destrutivas.
  * Retorna Promise<boolean>.

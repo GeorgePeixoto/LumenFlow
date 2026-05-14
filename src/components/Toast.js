@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Toast component
+﻿/**
+ * LumenFlow — Toast component
  *
  * Notificacoes temporarias empilhaveis.
  *

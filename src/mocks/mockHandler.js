@@ -1,5 +1,5 @@
 ﻿/**
- * EnergyFlow — Mock Handler (Demo Mode).
+ * LumenFlow — Mock Handler (Demo Mode).
  *
  * Mapeia endpoints da API para respostas mock.
  * Rotas de dashboard e setores buscam dados reais do Firebase RTDB.

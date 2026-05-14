@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Alert Detail Modal (US17-F4)
+﻿/**
+ * LumenFlow — Alert Detail Modal (US17-F4)
  *
  * Modal showing full alert context, mini chart, and actions.
  */

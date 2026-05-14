@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — FormField wrapper
+﻿/**
+ * LumenFlow — FormField wrapper
  *
  * Wrapper consistente para label, input slot, helper text e mensagem de erro.
  * Usado internamente por Input, Select, Textarea, etc.

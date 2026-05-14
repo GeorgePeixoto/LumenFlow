@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Button component
+﻿/**
+ * LumenFlow — Button component
  *
  * Uso:
  *   import { createButton } from './components/Button.js';

@@ -1,5 +1,5 @@
 ﻿/**
- * EnergyFlow — GoalProgress component (US12-F3).
+ * LumenFlow — GoalProgress component (US12-F3).
  *
  * Barra de progresso grande mostrando consumo atual vs meta,
  * com marcadores de milestone e projeção.

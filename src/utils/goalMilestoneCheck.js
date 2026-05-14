@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Goal Milestone Check (US12-F4)
+﻿/**
+ * LumenFlow — Goal Milestone Check (US12-F4)
  *
  * On dashboard load, checks active goals for milestone crossings
  * and shows toast notifications. Uses sessionStorage to avoid

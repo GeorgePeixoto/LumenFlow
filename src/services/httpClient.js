@@ -1,5 +1,5 @@
-/**
- * EnergyFlow - HTTP client
+﻿/**
+ * LumenFlow - HTTP client
  *
  * Wrapper centralizado sobre fetch. Todos os services devem passar por aqui
  * para manter base URL, auth, parsing e erros HTTP consistentes.

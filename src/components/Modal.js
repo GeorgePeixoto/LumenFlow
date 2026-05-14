@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Modal component
+﻿/**
+ * LumenFlow — Modal component
  *
  * Modal acessivel com focus trap, fecha com ESC, backdrop opcional.
  *

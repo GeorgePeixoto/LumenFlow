@@ -1,5 +1,5 @@
-/**
- * EnergyFlow — Página de login (US02-F1).
+﻿/**
+ * LumenFlow — Página de login (US02-F1).
  *
  * Layout consistente com register.js (mesma estrutura auth-layout).
  * Campos: e-mail, senha (PasswordInput — entrega US04), "Lembre-se de mim",
@@ -134,7 +134,7 @@ export function renderLoginPage(container) {
       ${t('app.name')}
     </div>
     <div class="auth-brand__content">
-      <h2 class="auth-brand__headline">Bem-vindo de volta ao EnergyFlow</h2>
+      <h2 class="auth-brand__headline">Bem-vindo de volta ao LumenFlow</h2>
       <p class="auth-brand__tagline">
         Continue monitorando o consumo energético da sua empresa com inteligência e precisão.
       </p>

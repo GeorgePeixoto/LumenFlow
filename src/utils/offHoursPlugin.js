@@ -1,5 +1,5 @@
 ﻿/**
- * EnergyFlow — Off-hours shading plugin for Chart.js (US07-F2).
+ * LumenFlow — Off-hours shading plugin for Chart.js (US07-F2).
  *
  * Draws semi-transparent background bands on time-series charts
  * to highlight periods outside business hours.
