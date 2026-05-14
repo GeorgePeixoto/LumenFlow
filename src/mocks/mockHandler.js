@@ -54,11 +54,11 @@ async function getFirebaseKpis() {
   const sensores = await firebaseRTDB.get('sensores');
   const activeDevices = sensores ? Object.keys(sensores).length : 0;
 
-  const currentTimestamp = live.timestamp;
+  const currentTimestamp = String(live.timestamp);
   const currentCost = live.estimativaCusto_R || 0;
   const currentKwh = live.totalEnergy_kWh || 0;
 
-  if (_lastCostTimestamp !== null && currentTimestamp !== _lastCostTimestamp) {
+  if (_lastCostTimestamp !== null && currentTimestamp !== String(_lastCostTimestamp)) {
     _accumulatedCost += currentCost;
     _accumulatedKwh += currentKwh;
     recordConsumptionReading(currentKwh);
