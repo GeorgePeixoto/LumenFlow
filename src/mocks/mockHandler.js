@@ -61,9 +61,11 @@ async function getFirebaseKpis() {
   if (_lastCostTimestamp !== null && currentTimestamp !== _lastCostTimestamp) {
     _accumulatedCost += currentCost;
     _accumulatedKwh += currentKwh;
+    recordConsumptionReading(currentKwh);
   } else if (_lastCostTimestamp === null) {
     _accumulatedCost = currentCost;
     _accumulatedKwh = currentKwh;
+    recordConsumptionReading(currentKwh);
   }
   _lastCostTimestamp = currentTimestamp;
   _persistAccumulated();
@@ -88,18 +90,107 @@ async function getFirebaseTopSectors() {
   return { sectors };
 }
 
-function generateConsumptionFromLive(totalKwh) {
+// ── Histórico de consumo (persistido no localStorage) ────────────────────────
+
+const CONSUMPTION_HISTORY_KEY = 'ef_consumption_history';
+
+function getConsumptionHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(CONSUMPTION_HISTORY_KEY) || '[]');
+  } catch { return []; }
+}
+
+function saveConsumptionHistory(history) {
+  localStorage.setItem(CONSUMPTION_HISTORY_KEY, JSON.stringify(history));
+}
+
+function recordConsumptionReading(kwh) {
+  const now = new Date();
+  const timestamp = now.toISOString();
+  const history = getConsumptionHistory();
+  history.push({ timestamp, kwh });
+  // Manter no máximo 30 dias de dados (1 leitura a cada ~5s = ~518400 em 30 dias, limitar a 5000)
+  if (history.length > 5000) {
+    history.splice(0, history.length - 5000);
+  }
+  saveConsumptionHistory(history);
+}
+
+function getConsumptionChart(granularity) {
+  const history = getConsumptionHistory();
+  if (!history.length) return null;
+
+  const now = new Date();
   const labels = [];
   const values = [];
-  const days = 30;
-  const dailyAvg = totalKwh / 30;
-  for (let i = days; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    labels.push(d.toISOString().split('T')[0]);
-    const variation = (Math.random() - 0.5) * dailyAvg * 0.4;
-    values.push(Math.round((dailyAvg + variation) * 100) / 100);
+
+  if (granularity === 'hour' || granularity === 'today') {
+    // Últimas 24 horas, agrupado por hora
+    for (let i = 23; i >= 0; i--) {
+      const hourStart = new Date(now);
+      hourStart.setHours(now.getHours() - i, 0, 0, 0);
+      const hourEnd = new Date(hourStart);
+      hourEnd.setHours(hourStart.getHours() + 1);
+
+      const readings = history.filter(r => {
+        const t = new Date(r.timestamp);
+        return t >= hourStart && t < hourEnd;
+      });
+
+      labels.push(`${String(hourStart.getHours()).padStart(2, '0')}:00`);
+      if (readings.length > 0) {
+        const sum = readings.reduce((acc, r) => acc + r.kwh, 0);
+        values.push(Math.round((sum / readings.length) * 100) / 100);
+      } else {
+        values.push(0);
+      }
+    }
+  } else if (granularity === 'day' || granularity === '7d') {
+    // Últimos 7 dias, agrupado por dia
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = new Date(now);
+      dayStart.setDate(now.getDate() - i);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayStart.getDate() + 1);
+
+      const readings = history.filter(r => {
+        const t = new Date(r.timestamp);
+        return t >= dayStart && t < dayEnd;
+      });
+
+      labels.push(dayStart.toISOString().split('T')[0]);
+      if (readings.length > 0) {
+        const sum = readings.reduce((acc, r) => acc + r.kwh, 0);
+        values.push(Math.round((sum / readings.length) * 100) / 100);
+      } else {
+        values.push(0);
+      }
+    }
+  } else {
+    // Últimos 30 dias (default)
+    for (let i = 29; i >= 0; i--) {
+      const dayStart = new Date(now);
+      dayStart.setDate(now.getDate() - i);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayStart.getDate() + 1);
+
+      const readings = history.filter(r => {
+        const t = new Date(r.timestamp);
+        return t >= dayStart && t < dayEnd;
+      });
+
+      labels.push(dayStart.toISOString().split('T')[0]);
+      if (readings.length > 0) {
+        const sum = readings.reduce((acc, r) => acc + r.kwh, 0);
+        values.push(Math.round((sum / readings.length) * 100) / 100);
+      } else {
+        values.push(0);
+      }
+    }
   }
+
   return { labels, values };
 }
 
@@ -144,8 +235,14 @@ export async function handleMockRequest(method, url, body) {
   if (method === 'GET' && matches(path, '/dashboard/consumption')) {
     try {
       const live = await firebaseRTDB.get('dashboard/readings/live');
-      if (live?.totalEnergy_kWh) return generateConsumptionFromLive(live.totalEnergy_kWh);
+      if (live?.totalEnergy_kWh) {
+        recordConsumptionReading(live.totalEnergy_kWh);
+      }
     } catch (_) {}
+    const params = extractQuery(url);
+    const granularity = params.granularity || '30d';
+    const chart = getConsumptionChart(granularity);
+    if (chart && chart.labels.length) return chart;
     return MOCK_CONSUMPTION_30D;
   }
   if (method === 'GET' && matches(path, '/dashboard/top-sectors')) {
