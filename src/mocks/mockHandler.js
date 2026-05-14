@@ -125,7 +125,8 @@ function getConsumptionChart(granularity) {
   const values = [];
 
   if (granularity === 'hour' || granularity === 'today') {
-    // Últimas 24 horas, agrupado por hora
+    // Últimas 24 horas, agrupado por hora (soma acumulada)
+    let accumulated = 0;
     for (let i = 23; i >= 0; i--) {
       const hourStart = new Date(now);
       hourStart.setHours(now.getHours() - i, 0, 0, 0);
@@ -139,14 +140,13 @@ function getConsumptionChart(granularity) {
 
       labels.push(`${String(hourStart.getHours()).padStart(2, '0')}:00`);
       if (readings.length > 0) {
-        const sum = readings.reduce((acc, r) => acc + r.kwh, 0);
-        values.push(Math.round((sum / readings.length) * 100) / 100);
-      } else {
-        values.push(0);
+        accumulated += readings.reduce((acc, r) => acc + r.kwh, 0);
       }
+      values.push(Math.round(accumulated * 100) / 100);
     }
   } else if (granularity === 'day' || granularity === '7d') {
-    // Últimos 7 dias, agrupado por dia
+    // Últimos 7 dias, agrupado por dia (soma acumulada)
+    let accumulated = 0;
     for (let i = 6; i >= 0; i--) {
       const dayStart = new Date(now);
       dayStart.setDate(now.getDate() - i);
@@ -161,14 +161,13 @@ function getConsumptionChart(granularity) {
 
       labels.push(dayStart.toISOString().split('T')[0]);
       if (readings.length > 0) {
-        const sum = readings.reduce((acc, r) => acc + r.kwh, 0);
-        values.push(Math.round((sum / readings.length) * 100) / 100);
-      } else {
-        values.push(0);
+        accumulated += readings.reduce((acc, r) => acc + r.kwh, 0);
       }
+      values.push(Math.round(accumulated * 100) / 100);
     }
   } else {
-    // Últimos 30 dias (default)
+    // Últimos 30 dias (default, soma acumulada)
+    let accumulated = 0;
     for (let i = 29; i >= 0; i--) {
       const dayStart = new Date(now);
       dayStart.setDate(now.getDate() - i);
@@ -183,11 +182,9 @@ function getConsumptionChart(granularity) {
 
       labels.push(dayStart.toISOString().split('T')[0]);
       if (readings.length > 0) {
-        const sum = readings.reduce((acc, r) => acc + r.kwh, 0);
-        values.push(Math.round((sum / readings.length) * 100) / 100);
-      } else {
-        values.push(0);
+        accumulated += readings.reduce((acc, r) => acc + r.kwh, 0);
       }
+      values.push(Math.round(accumulated * 100) / 100);
     }
   }
 
