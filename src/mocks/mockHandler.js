@@ -22,10 +22,12 @@ import { firebaseRTDB } from '../services/firebaseRealtimeService.js';
 
 let _lastCostTimestamp = JSON.parse(localStorage.getItem('ef_last_cost_ts') || 'null');
 let _accumulatedCost = JSON.parse(localStorage.getItem('ef_accumulated_cost') || '0');
+let _accumulatedKwh = JSON.parse(localStorage.getItem('ef_accumulated_kwh') || '0');
 
-function _persistCost() {
+function _persistAccumulated() {
   localStorage.setItem('ef_last_cost_ts', JSON.stringify(_lastCostTimestamp));
   localStorage.setItem('ef_accumulated_cost', JSON.stringify(_accumulatedCost));
+  localStorage.setItem('ef_accumulated_kwh', JSON.stringify(_accumulatedKwh));
 }
 
 async function getFirebaseSectors() {
@@ -54,17 +56,20 @@ async function getFirebaseKpis() {
 
   const currentTimestamp = live.timestamp;
   const currentCost = live.estimativaCusto_R || 0;
+  const currentKwh = live.totalEnergy_kWh || 0;
 
   if (_lastCostTimestamp !== null && currentTimestamp !== _lastCostTimestamp) {
     _accumulatedCost += currentCost;
+    _accumulatedKwh += currentKwh;
   } else if (_lastCostTimestamp === null) {
     _accumulatedCost = currentCost;
+    _accumulatedKwh = currentKwh;
   }
   _lastCostTimestamp = currentTimestamp;
-  _persistCost();
+  _persistAccumulated();
 
   return {
-    consumption_kwh: live.totalEnergy_kWh || 0,
+    consumption_kwh: _accumulatedKwh,
     consumption_variation: 0,
     estimated_cost: _accumulatedCost,
     cost_variation: 0,
