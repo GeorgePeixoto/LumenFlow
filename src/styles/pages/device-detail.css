@@ -1,0 +1,140 @@
+/* Device Detail Page Premium (US16-F1, US16-F2) */
+
+.device-detail-info {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-base);
+}
+
+.device-detail-info:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.device-detail-info__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-5);
+}
+
+.device-detail-info__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.device-detail-info__label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.device-detail-info__value {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+/* Tabs */
+.device-detail-tabs {
+  margin-top: var(--space-4);
+}
+
+.device-detail-tabs__nav {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: var(--space-5);
+}
+
+.device-detail-tabs__btn {
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  background: none;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-fast);
+  margin-bottom: -1px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.device-detail-tabs__btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.device-detail-tabs__btn--active {
+  color: var(--color-primary-600);
+  border-bottom-color: var(--color-primary-600);
+  font-weight: var(--weight-semibold);
+}
+
+/* Readings */
+.device-detail-readings__picker {
+  margin-bottom: var(--space-4);
+}
+
+.device-detail-chart {
+  min-height: 300px;
+}
+
+/* Anomaly tooltip (US16-F2) */
+.device-detail-anomaly-reason {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dashed var(--text-muted);
+}
+
+.device-detail-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-neutral-900);
+  color: #fff;
+  font-size: var(--text-xs);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+  z-index: 100;
+  box-shadow: var(--shadow-lg);
+}
+
+.device-detail-anomaly-reason:hover .device-detail-tooltip,
+.device-detail-anomaly-reason:focus .device-detail-tooltip {
+  opacity: 1;
+}
+
+/* Maintenance */
+.device-detail-maintenance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.device-detail-maintenance-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .device-detail-info__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .device-detail-tabs__nav {
+    overflow-x: auto;
+  }
+}

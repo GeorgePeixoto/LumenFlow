@@ -1,0 +1,80 @@
+/* ============================================================
+   EnergyFlow — PageHeader Premium & page layout utils.
+   Usados por todas as páginas privadas.
+   ============================================================ */
+
+/* ── Wrapper da página ────────────────────────────────────────── */
+.page-header {
+  margin-bottom: var(--space-8);
+}
+
+/* ── Breadcrumb ───────────────────────────────────────────────── */
+.page-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.page-breadcrumb__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.page-breadcrumb__item a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.page-breadcrumb__item a:hover { color: var(--color-primary-600); }
+
+/* Separador entre itens de breadcrumb */
+.page-breadcrumb__item + .page-breadcrumb__item::before {
+  content: '/';
+  color: var(--border-color);
+}
+
+/* ── Linha de título ──────────────────────────────────────────── */
+.page-header__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.page-header__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+/* Área de ações (botões, filtros) à direita do título */
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+/* ── Descrição / subtítulo ────────────────────────────────────── */
+.page-header__desc {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+  margin-bottom: 0;
+  max-width: 600px;
+}
+
+/* ── Corpo da página ──────────────────────────────────────────── */
+.page-body {
+  /* Container neutro; conteúdo define seu próprio layout. */
+}

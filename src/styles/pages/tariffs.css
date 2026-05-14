@@ -1,0 +1,24 @@
+/* Tariffs Page Premium (US10-F3) */
+
+.tariffs-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-4);
+}
+
+.tariffs-badge--current {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  background: color-mix(in srgb, var(--color-success) 12%, transparent);
+  color: var(--color-success);
+}
+
+.tariff-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}

@@ -1,0 +1,423 @@
+/* ============================================================
+   EnergyFlow — Painel da Transparência (US06-F1)
+   Layout em grid de cards grandes com semáforo por setor.
+   Pensado para monitores grandes / TV.
+   ============================================================ */
+
+.transparency-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-6);
+  padding: var(--space-4) 0;
+}
+
+@media (min-width: 1600px) {
+  .transparency-grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  }
+}
+
+/* ── Card de setor ─────────────────────────────────────────── */
+
+.transparency-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.transparency-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.transparency-card--normal {
+  border-color: var(--color-success);
+}
+
+.transparency-card--warning {
+  border-color: var(--color-warning);
+}
+
+.transparency-card--critical {
+  border-color: var(--color-danger);
+}
+
+/* ── Semáforo (indicador grande) ───────────────────────────── */
+
+.transparency-card__semaphore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  transition: background-color var(--transition-base);
+}
+
+.transparency-card__semaphore--normal {
+  background-color: var(--color-success);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-success) 40%, transparent);
+}
+
+.transparency-card__semaphore--warning {
+  background-color: var(--color-warning);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-warning) 40%, transparent);
+}
+
+.transparency-card__semaphore--critical {
+  background-color: var(--color-danger);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-danger) 40%, transparent);
+  animation: pulse-critical 2s ease-in-out infinite;
+}
+
+@keyframes pulse-critical {
+  0%, 100% { box-shadow: 0 0 16px color-mix(in srgb, var(--color-danger) 40%, transparent); }
+  50%      { box-shadow: 0 0 28px color-mix(in srgb, var(--color-danger) 60%, transparent); }
+}
+
+.transparency-card__semaphore-icon {
+  color: var(--text-inverse);
+  display: flex;
+}
+
+/* ── Header do card ────────────────────────────────────────── */
+
+.transparency-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.transparency-card__name {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+}
+
+.transparency-card__status-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.transparency-card__status-label--normal {
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+.transparency-card__status-label--warning {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-dark);
+}
+
+.transparency-card__status-label--critical {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
+}
+
+/* ── Consumo ───────────────────────────────────────────────── */
+
+.transparency-card__consumption {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.transparency-card__value {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  line-height: var(--leading-none);
+  font-family: var(--font-family-mono);
+}
+
+.transparency-card__unit {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+/* ── Thresholds ────────────────────────────────────────────── */
+
+.transparency-card__thresholds {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ── Timestamp ─────────────────────────────────────────────── */
+
+.transparency-card__timestamp {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: auto;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-color);
+}
+
+/* ── Loading skeleton ──────────────────────────────────────── */
+
+.transparency-card--loading .transparency-card__semaphore,
+.transparency-card--loading .transparency-card__name,
+.transparency-card--loading .transparency-card__value,
+.transparency-card--loading .transparency-card__thresholds,
+.transparency-card--loading .transparency-card__timestamp {
+  background: linear-gradient(90deg, var(--color-neutral-100) 25%, var(--color-neutral-200) 50%, var(--color-neutral-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  color: transparent;
+  border-radius: var(--radius-sm);
+}
+
+.transparency-card--loading .transparency-card__semaphore {
+  box-shadow: none;
+}
+
+.transparency-card--loading .transparency-card__semaphore-icon {
+  visibility: hidden;
+}
+
+.transparency-card--loading .transparency-card__status-label {
+  visibility: hidden;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Responsivo ────────────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  .transparency-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .transparency-card {
+    padding: var(--space-4);
+  }
+
+  .transparency-card__semaphore {
+    width: 48px;
+    height: 48px;
+  }
+
+  .transparency-card__value {
+    font-size: var(--text-2xl);
+  }
+}
+
+/* ============================================================
+   Modo TV / Quiosque (US06-F3)
+   Overlay fullscreen que esconde AppShell.
+   ============================================================ */
+
+.tv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.tv-overlay__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.tv-overlay__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.tv-overlay__logo {
+  color: var(--color-primary-500);
+  display: flex;
+}
+
+.tv-overlay__company {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+.tv-overlay__clock {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+  font-family: var(--font-family-mono);
+  color: var(--text-secondary);
+}
+
+.tv-overlay__exit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tv-overlay__exit:hover {
+  background: var(--color-neutral-100);
+  border-color: var(--border-color-hover);
+}
+
+.tv-overlay__body {
+  flex: 1;
+  padding: var(--space-6);
+  overflow: auto;
+}
+
+.tv-overlay__body .transparency-grid {
+  padding: 0;
+}
+
+.tv-overlay__body .transparency-card__value {
+  font-size: var(--text-4xl);
+}
+
+.tv-overlay__body .transparency-card__semaphore {
+  width: 80px;
+  height: 80px;
+}
+
+.tv-overlay__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-6);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.tv-overlay__legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.tv-overlay__legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tv-overlay__legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.tv-overlay__legend-dot--normal {
+  background-color: var(--color-success);
+}
+
+.tv-overlay__legend-dot--warning {
+  background-color: var(--color-warning);
+}
+
+.tv-overlay__legend-dot--critical {
+  background-color: var(--color-danger);
+}
+
+/* ============================================================
+   Legenda inline (US06-F4)
+   Exibida abaixo do grid na página normal.
+   ============================================================ */
+
+.transparency-legend {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.transparency-legend__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.transparency-legend__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.transparency-legend__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.transparency-legend__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.transparency-legend__dot--normal {
+  background-color: var(--color-success);
+}
+
+.transparency-legend__dot--warning {
+  background-color: var(--color-warning);
+}
+
+.transparency-legend__dot--critical {
+  background-color: var(--color-danger);
+}
+
+.transparency-legend__text {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.transparency-legend__text strong {
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+}
+
+.transparency-legend__calc {
+  margin-top: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+@media (max-width: 639px) {
+  .transparency-legend__items {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+}

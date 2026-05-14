@@ -1,0 +1,127 @@
+/* ============================================================
+   EnergyFlow — CSS Reset
+   Baseado no modern-css-reset de Andy Bell (versao simplificada).
+
+   Escolha: modern-css-reset sobre Eric Meyer (datado, nao trata
+   novos elementos como dialog/summary) e Tailwind preflight
+   (opinionado demais, reseta formularios agressivamente, pensado
+   para utility-first). Andy Bell e leve, moderno, e preserva
+   defaults uteis (listas com role="list" perdem bullets, etc).
+   ============================================================ */
+
+/* Box sizing global */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Margens e paddings zerados */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Prevenir ajuste de tamanho de texto no mobile */
+html {
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+/* Altura minima do body, renderizacao de texto suavizada */
+body {
+  min-height: 100vh;
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings e elementos interativos herdam fonte */
+h1, h2, h3, h4, h5, h6,
+button, input, select, textarea {
+  font: inherit;
+}
+
+/* Headings com text-wrap balance para melhor quebra de linha */
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: balance;
+}
+
+/* Paragrafos com overflow-wrap */
+p, li, figcaption {
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+
+/* Listas com role="list" perdem estilo de lista (acessibilidade Safari) */
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+}
+
+/* Links sem classe herdam cor */
+a:not([class]) {
+  text-decoration-skip-ink: auto;
+}
+
+/* Imagens e midias responsivas */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Textarea nao redimensiona horizontalmente */
+textarea {
+  resize: vertical;
+}
+
+/* Inputs e botoes sem aparencia nativa para estilizacao consistente */
+input, button, textarea, select {
+  border: none;
+  background: none;
+  outline: none;
+}
+
+/* Botoes com cursor pointer */
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/* Tabelas com border-collapse */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Remover animacoes para quem prefere movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Dialog reset */
+dialog {
+  padding: 0;
+  border: none;
+}
+
+/* fieldset/legend reset */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* summary cursor */
+summary {
+  cursor: pointer;
+}

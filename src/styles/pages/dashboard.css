@@ -1,0 +1,242 @@
+﻿/* ============================================================
+   EnergyFlow — Dashboard Premium
+   ============================================================ */
+
+.dashboard-section {
+  margin-top: var(--space-8);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow var(--transition-base);
+}
+
+.dashboard-section:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.dashboard-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  opacity: 0.6;
+}
+
+.dashboard-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.dashboard-section__title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.dashboard-chart-container {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-chart-container .ef-chart {
+  width: 100%;
+}
+
+/* ── Alertas recentes ──────────────────────────────────────── */
+
+.dashboard-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dashboard-alerts__empty {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  padding: var(--space-6) 0;
+  text-align: center;
+}
+
+.dashboard-off-hours__count {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-warning-dark);
+  background: var(--color-warning-light);
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-3);
+}
+
+/* ── Goal Progress in dashboard (US12-F3) ──────────────────── */
+
+.dashboard-goal-progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+
+.dashboard-goal-progress:empty {
+  display: none;
+}
+
+.dashboard-alert-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--bg-primary);
+}
+
+.dashboard-alert-item:hover {
+  background: var(--color-primary-50);
+  border-color: var(--color-primary-200);
+  transform: translateX(4px);
+}
+
+.dashboard-alert-item__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  background-color: var(--color-warning);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-warning) 20%, transparent);
+}
+
+.dashboard-alert-item--high .dashboard-alert-item__dot,
+.dashboard-alert-item--critical .dashboard-alert-item__dot {
+  background-color: var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 20%, transparent);
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+.dashboard-alert-item--low .dashboard-alert-item__dot {
+  background-color: var(--color-info);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-info) 20%, transparent);
+}
+
+@keyframes dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 20%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-danger) 10%, transparent); }
+}
+
+.dashboard-alert-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dashboard-alert-item__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-alert-item__meta {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ── Atalhos rápidos ───────────────────────────────────────── */
+
+.dashboard-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-4);
+}
+
+.dashboard-action-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-action-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.dashboard-action-card:hover {
+  border-color: var(--color-primary-300);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.dashboard-action-card:hover::after {
+  opacity: 0.04;
+}
+
+.dashboard-action-card__icon {
+  color: var(--color-primary-500);
+  display: flex;
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-action-card span:last-child {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Responsivo ────────────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  .dashboard-section {
+    padding: var(--space-4);
+    margin-top: var(--space-5);
+    border-radius: var(--radius-lg);
+  }
+
+  .dashboard-section__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dashboard-action-card {
+    padding: var(--space-4);
+  }
+}

@@ -1,0 +1,314 @@
+/* ============================================================
+   Form components Premium — estilos
+   FormField, Input, PasswordInput, Select, Checkbox, Radio, Textarea
+   ============================================================ */
+
+/* --- FormField wrapper --- */
+.ef-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ef-field + .ef-field {
+  margin-top: var(--space-5);
+}
+
+/* --- Label --- */
+.ef-field__label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  transition: color var(--transition-fast);
+}
+
+.ef-field:focus-within .ef-field__label {
+  color: var(--color-primary-700);
+}
+
+.ef-field__required {
+  color: var(--color-danger);
+  font-weight: var(--weight-bold);
+}
+
+/* --- Input wrapper (para icone e toggle) --- */
+.ef-field__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* --- Input base --- */
+.ef-input {
+  font-family: var(--font-family-sans);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  width: 100%;
+  transition: all var(--transition-fast);
+  line-height: var(--leading-normal);
+  min-height: 44px;
+}
+
+.ef-input:hover:not(:disabled) {
+  border-color: var(--border-color-hover);
+}
+
+.ef-input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12), 0 1px 2px rgba(0, 0, 0, 0.04);
+  outline: none;
+}
+
+.ef-input::placeholder {
+  color: var(--text-muted);
+}
+
+.ef-input:disabled {
+  background-color: var(--color-neutral-50);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Input com icone esquerdo */
+.ef-field__input-wrap--icon-left .ef-input {
+  padding-left: var(--space-10);
+}
+
+.ef-field__icon-left {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  transition: color var(--transition-fast);
+}
+
+.ef-field:focus-within .ef-field__icon-left {
+  color: var(--color-primary-500);
+}
+
+/* Input com botao direito (password toggle) */
+.ef-field__input-wrap--icon-right .ef-input {
+  padding-right: var(--space-10);
+}
+
+.ef-field__icon-right {
+  position: absolute;
+  right: var(--space-1);
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.ef-field__icon-right:hover {
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+}
+
+/* --- Estado de erro --- */
+.ef-field--error .ef-input,
+.ef-field--error .ef-select,
+.ef-field--error .ef-textarea {
+  border-color: var(--color-danger);
+}
+
+.ef-field--error .ef-input:focus,
+.ef-field--error .ef-select:focus,
+.ef-field--error .ef-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.ef-field__error {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: var(--weight-medium);
+}
+
+/* --- Helper text --- */
+.ef-field__helper {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* --- Select --- */
+.ef-select {
+  font-family: var(--font-family-sans);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-8) var(--space-3) var(--space-4);
+  width: 100%;
+  min-height: 44px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+}
+
+.ef-select:hover:not(:disabled) {
+  border-color: var(--border-color-hover);
+}
+
+.ef-select:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12), 0 1px 2px rgba(0, 0, 0, 0.04);
+  outline: none;
+}
+
+.ef-select:disabled {
+  background-color: var(--color-neutral-50);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* --- Textarea --- */
+.ef-textarea {
+  font-family: var(--font-family-sans);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
+  transition: all var(--transition-fast);
+  line-height: var(--leading-normal);
+}
+
+.ef-textarea:hover:not(:disabled) {
+  border-color: var(--border-color-hover);
+}
+
+.ef-textarea:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12), 0 1px 2px rgba(0, 0, 0, 0.04);
+  outline: none;
+}
+
+.ef-textarea:disabled {
+  background-color: var(--color-neutral-50);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* --- Checkbox & Radio --- */
+.ef-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  line-height: var(--leading-normal);
+}
+
+.ef-check + .ef-check {
+  margin-top: var(--space-2);
+}
+
+.ef-check__input {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border: 2px solid var(--border-color);
+  background-color: var(--bg-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ef-check__input[type="checkbox"] {
+  border-radius: var(--radius-sm);
+}
+
+.ef-check__input[type="radio"] {
+  border-radius: var(--radius-full);
+}
+
+.ef-check__input:hover:not(:disabled) {
+  border-color: var(--color-primary-500);
+}
+
+.ef-check__input:focus-visible {
+  outline: 2px solid var(--border-color-focus);
+  outline-offset: 2px;
+}
+
+.ef-check__input:checked {
+  background-color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3);
+}
+
+.ef-check__input[type="checkbox"]:checked::after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
+}
+
+.ef-check__input[type="radio"]:checked::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: white;
+}
+
+.ef-check__input:disabled {
+  background-color: var(--color-neutral-100);
+  cursor: not-allowed;
+}
+
+.ef-check__input:disabled + .ef-check__label {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.ef-check__label {
+  cursor: pointer;
+}
+
+/* --- Dark mode --- */
+[data-theme="dark"] .ef-input:disabled,
+[data-theme="dark"] .ef-select:disabled,
+[data-theme="dark"] .ef-textarea:disabled,
+[data-theme="dark"] .ef-check__input:disabled {
+  background-color: rgba(148, 163, 184, 0.08);
+}
+
+[data-theme="dark"] .ef-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
