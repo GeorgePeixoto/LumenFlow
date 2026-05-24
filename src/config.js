@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LumenFlow — Configuracao centralizada.
  *
  * Toda URL, feature flag ou constante de ambiente vem daqui.
@@ -9,7 +9,7 @@ const Config = Object.freeze({
   APP_NAME: 'LumenFlow',
   VERSION: '0.1.0',
   DEFAULT_LOCALE: 'pt-BR',
-  POLLING_INTERVAL_MS: 30000,
+  POLLING_INTERVAL_MS: 2000,
   TOAST_DURATION_MS: 5000,
   TOKEN_STORAGE_KEY: 'ef_token',
   REMEMBER_STORAGE_KEY: 'ef_remember',

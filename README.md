@@ -37,5 +37,5 @@ O projeto foi modelado com uma abordagem técnica escalável, dividida em três 
 Os artefatos visuais pertinentes à Engenharia de Software estão sendo elaborados:
 * `[ ]` Diagrama C4 Model da Arquitetura
 * `[ ]` Diagramas de Casos de Uso (Atores vs Sistema)
-* `[ ]` Esquemas do Banco de Dados (JSON Tree Structure)
-* `[ ]` Código/Firmware e esquemático da conexão do microcontrolador (Wokwi)
+* `[x]` Esquemas do Banco de Dados (JSON Tree Structure)
+* `[x]` Código/Firmware e esquemático da conexão do microcontrolador (Wokwi)
