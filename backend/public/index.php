@@ -47,5 +47,12 @@ if ($requestUri === '/api/telemetry' && $requestMethod === 'GET') {
     exit();
 }
 
+// Roteamento: Registro de Empresa (US01)
+if ($requestUri === '/api/auth/register' && $requestMethod === 'POST') {
+    $controller = new \App\Controllers\AuthController();
+    $controller->register();
+    exit();
+}
+
 http_response_code(404);
 echo json_encode(['error' => 'Endpoint not found']);
