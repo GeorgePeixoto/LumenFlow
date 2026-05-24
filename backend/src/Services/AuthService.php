@@ -89,4 +89,108 @@ class AuthService
             ]
         ];
     }
+
+    /**
+     * Realiza o login, verifica bloqueio por força bruta e gera JWT.
+     * @throws \Exception
+     */
+    public function loginUser(array $credentials)
+    {
+        $email = strtolower(trim($credentials['email'] ?? ''));
+        $password = $credentials['password'] ?? '';
+        $rememberMe = $credentials['remember_me'] ?? false;
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+        // 1. Verifica Rate Limit (Bloqueio de 15min por 5 falhas)
+        $this->checkRateLimit($email, $ip);
+
+        // 2. Busca o usuário pelo E-mail
+        $userDocs = $this->firestore->collection('users')->where('email', '=', $email)->documents();
+        $users = iterator_to_array($userDocs);
+
+        if (empty($users)) {
+            $this->registerFailedAttempt($email, $ip);
+            throw new \Exception('INVALID_CREDENTIALS');
+        }
+
+        $userDoc = reset($users);
+        $userData = $userDoc->data();
+
+        // 3. Verifica a Senha contra o hash do banco
+        if (!password_verify($password, $userData['password_hash'])) {
+            $this->registerFailedAttempt($email, $ip);
+            throw new \Exception('INVALID_CREDENTIALS');
+        }
+
+        // Login Bem-Sucedido
+        AuditLogger::log($userData['company_id'], $userData['user_id'], 'LOGIN_SUCCESS');
+
+        // 4. Geração do Token JWT (US02-B1, US02-B2)
+        $secretKey = $_ENV['JWT_SECRET'] ?? 'fallback_secret_energyflow_super_safe';
+        $issuedAt = time();
+        // 30 dias se lembrar de mim, 8 horas caso contrário
+        $expire = $rememberMe ? ($issuedAt + (30 * 24 * 60 * 60)) : ($issuedAt + (8 * 60 * 60)); 
+
+        $payload = [
+            'iat'  => $issuedAt,
+            'exp'  => $expire,
+            'sub'  => $userData['user_id'],
+            'company_id' => $userData['company_id'],
+            'role' => $userData['role']
+        ];
+
+        $jwt = \App\Utils\JwtHelper::encode($payload, $secretKey);
+
+        return [
+            'token' => $jwt,
+            'user' => [
+                'id' => $userData['user_id'],
+                'name' => $userData['name'],
+                'email' => $userData['email'],
+                'role' => $userData['role']
+            ]
+        ];
+    }
+
+    /**
+     * Valida se houve mais de 5 falhas nos últimos 15 minutos (evitando índices compostos no Firestore)
+     */
+    private function checkRateLimit(string $email, string $ip)
+    {
+        $emailIp = $email . '|' . $ip;
+        $windowStart = strtotime('-15 minutes');
+
+        $attemptsQuery = $this->firestore->collection('login_attempts')
+            ->where('email_ip', '=', $emailIp)
+            ->documents();
+
+        $count = 0;
+        foreach ($attemptsQuery as $attempt) {
+            $data = $attempt->data();
+            $time = strtotime($data['timestamp']);
+            if ($time > $windowStart) {
+                $count++;
+            }
+        }
+
+        if ($count >= 5) {
+            throw new \Exception('RATE_LIMIT_EXCEEDED');
+        }
+    }
+
+    /**
+     * Grava a falha na coleção temporária
+     */
+    private function registerFailedAttempt(string $email, string $ip)
+    {
+        $emailIp = $email . '|' . $ip;
+        $this->firestore->collection('login_attempts')->add([
+            'email_ip' => $emailIp,
+            'email' => $email,
+            'ip' => $ip,
+            'timestamp' => date('c')
+        ]);
+        
+        AuditLogger::log('unknown', 'unknown', 'LOGIN_FAILED', ['email' => $email, 'ip' => $ip]);
+    }
 }

@@ -54,5 +54,12 @@ if ($requestUri === '/api/auth/register' && $requestMethod === 'POST') {
     exit();
 }
 
+// Roteamento: Login e Sessão (US02)
+if ($requestUri === '/api/auth/login' && $requestMethod === 'POST') {
+    $controller = new \App\Controllers\AuthController();
+    $controller->login();
+    exit();
+}
+
 http_response_code(404);
 echo json_encode(['error' => 'Endpoint not found']);

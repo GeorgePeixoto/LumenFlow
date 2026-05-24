@@ -44,4 +44,38 @@ class AuthController
             }
         }
     }
+
+    public function login()
+    {
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        if (!$input) {
+            http_response_code(400);
+            echo json_encode(['code' => 'BAD_REQUEST', 'message' => 'Payload JSON inválido']);
+            return;
+        }
+
+        try {
+            $authService = new AuthService();
+            $result = $authService->loginUser($input);
+
+            http_response_code(200); // 200 OK
+            echo json_encode($result);
+
+        } catch (\Exception $e) {
+            $msg = $e->getMessage();
+            
+            if ($msg === 'INVALID_CREDENTIALS') {
+                http_response_code(401);
+                // Resposta genérica proposital (US02-A)
+                echo json_encode(['code' => 'INVALID_CREDENTIALS', 'message' => 'Credenciais inválidas.']);
+            } else if ($msg === 'RATE_LIMIT_EXCEEDED') {
+                http_response_code(429); // Too Many Requests
+                echo json_encode(['code' => 'RATE_LIMIT_EXCEEDED', 'message' => 'Muitas tentativas falhas. Tente novamente em 15 minutos.']);
+            } else {
+                http_response_code(500);
+                echo json_encode(['code' => 'SERVER_ERROR', 'message' => 'Erro interno: ' . $msg]);
+            }
+        }
+    }
 }
