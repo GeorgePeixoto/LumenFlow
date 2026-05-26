@@ -120,6 +120,59 @@ php artisan schedule:work
 - **Painel Financeiro** — Ranking de setores, custo diário, resumo mensal
 - **Metas** — Cadastro com acompanhamento de progresso percentual
 - **TV Mode / Transparência** — Interface visual com semáforo (verde/amarelo/vermelho)
+- **Manutenção de Dispositivos** — Registro de manutenções preventivas e corretivas
+
+## Credenciais de Demonstração
+
+Após rodar `php artisan migrate --seed`:
+
+| Campo | Valor |
+|-------|-------|
+| Email | `admin@lumenflow.com` |
+| Senha | `password` |
+
+## Deploy em Produção
+
+### Frontend (GitHub Pages)
+
+O frontend é 100% estático — basta servir os arquivos da raiz:
+
+1. Ative GitHub Pages no repositório (branch `main`, pasta `/`)
+2. Configure `src/config.js` com a URL da API de produção:
+   ```js
+   API_BASE_URL: 'https://sua-api.com/api'
+   ```
+3. O site estará disponível em `https://usuario.github.io/LumenFlow`
+
+### Backend (Servidor PHP)
+
+Qualquer servidor com PHP 8.3+ e MySQL:
+
+```bash
+cd backend
+composer install --optimize-autoloader --no-dev
+cp .env.example .env
+# Editar .env com credenciais de produção
+php artisan key:generate
+php artisan migrate --seed
+php artisan config:cache
+php artisan route:cache
+```
+
+Configure o cron do servidor para o scheduler:
+```
+* * * * * cd /path/to/backend && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### Variáveis de Ambiente Importantes
+
+| Variável | Descrição |
+|----------|-----------|
+| `APP_ENV` | `production` |
+| `APP_DEBUG` | `false` |
+| `DB_*` | Credenciais MySQL |
+| `FIREBASE_RTDB_URL` | URL do Firebase Realtime Database |
+| `FRONTEND_URL` | URL do frontend (para CORS) |
 
 ## Documentação
 

@@ -829,3 +829,55 @@ Criada pasta `wokwi/` com `README.md` documentando:
 ### O que foi feito
 
 O duplicado `firebaseRealtimeService.js` foi removido na Task 6.1. O único serviço Firebase é `src/services/firebase.js` (SSE + polling fallback), importado pelo store `realtime.js`.
+
+---
+
+## TASK 7.1 — Testes para novas rotas
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criados 2 arquivos de teste:
+
+- `tests/Feature/AlertBulkTest.php` — 4 testes: bulk acknowledge, bulk resolve, validação de ids, isolamento entre usuários
+- `tests/Feature/DeviceMaintenanceTest.php` — 4 testes: listar registros, criar manutenção, validação obrigatória, acesso negado a dispositivo de outro usuário
+
+---
+
+## TASK 7.2 — DatabaseSeeder com dados de demonstração
+
+**Status**: ✅ Concluída (já existente)
+**Data**: 2026-05-26
+
+O `DatabaseSeeder` já continha dados completos: usuário demo, 4 setores, 12 dispositivos, 7 dias de leituras, tarifas, metas, alertas e horário comercial.
+
+---
+
+## TASK 7.3 — Documentar deploy no README
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Adicionado ao `README.md`:
+- Seção "Credenciais de Demonstração" (email + senha do seed)
+- Seção "Deploy em Produção" com instruções para frontend (GitHub Pages) e backend (servidor PHP)
+- Tabela de variáveis de ambiente importantes
+- Funcionalidade "Manutenção de Dispositivos" na lista de features
+
+---
+
+## TASK 7.4 — Avaliação Tailwind CDN vs Build
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### Decisão
+
+Manter Tailwind CDN Play para o estágio atual:
+- Sem build step = compatível com GitHub Pages sem CI/CD
+- Configuração inline via `tailwind.config` no index.html
+- Para produção futura com otimização (purge CSS), migrar para Tailwind CLI ou PostCSS
