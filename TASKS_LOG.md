@@ -161,3 +161,102 @@ Integrado ao `firebase:sync` — alertas gerados automaticamente após cada sync
 php artisan tinker → detectAll() → {"overload":1,"off_hours":3,"night_waste":3,"anomaly":0}
 php artisan test → 24 testes, PASSED
 ```
+
+---
+
+## TASK 1.26 — GoalProjectionService
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criado `backend/app/Services/GoalProjectionService.php` com projeção de metas baseada no consumo real. Endpoints: `GET /api/goals/projections` e `GET /api/goals/{goal}/projection`.
+
+---
+
+## TASK 1.29 — tests/Unit/ConsumptionServiceTest.php
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criado `backend/tests/Unit/ConsumptionServiceTest.php` — 8 testes, 32 assertions cobrindo todos os métodos do ConsumptionService.
+
+---
+
+## TASK 1.30 — tests/Unit/AlertDetectionServiceTest.php
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criado `backend/tests/Unit/AlertDetectionServiceTest.php` — 11 testes, 19 assertions cobrindo overload, off_hours, night_waste, anomaly, cooldowns e multi-tenant.
+
+Verificação: `php vendor/bin/phpunit → 42 testes, 109 assertions, PASSED`
+
+---
+
+## TASK 2.7 — Atualizar config.js
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+- Adicionado `FIREBASE_RTDB_URL: 'https://projeto-pi-bf5a6-default-rtdb.firebaseio.com'`
+- `DEMO_MODE` alterado para `false`
+- Versão atualizada para `0.2.0`
+- `firebaseRealtimeService.js` agora importa URL do Config
+
+---
+
+## TASK 2.1 — HTTP Client para Laravel API
+
+**Status**: ✅ Concluída (já existente)
+**Data**: 2026-05-26
+
+### O que foi feito
+
+O `src/services/httpClient.js` já implementa 100% dos critérios de aceite: fetch wrapper com auth token automático, parsing JSON, erro estruturado (`ApiError`), evento `auth:expired` no 401. Todos os services já o utilizam. Nenhuma alteração necessária.
+
+---
+
+## TASK 2.20 — Converter Login Page para Alpine.js + Tailwind
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criados dois arquivos para a versão Alpine.js + Tailwind da página de login:
+
+| Arquivo | Propósito |
+|---------|-----------|
+| `src/pages/login-alpine.js` | Componente Alpine.data('loginPage') com lógica reativa |
+| `src/pages/login-alpine-template.js` | Função `renderLoginPageAlpine(container)` com HTML Tailwind |
+
+### Funcionalidades mantidas
+
+- Validação progressiva (blur) com feedback visual
+- Campos: e-mail, senha (com toggle de visibilidade)
+- Checkbox "Lembre-se de mim"
+- Link "Esqueci a senha" → `#/forgot-password`
+- Link "Criar conta" → `#/register`
+- Banner de erro global (credenciais inválidas, bloqueio, rede)
+- Botão Demo (condicional via `Config.DEMO_MODE`)
+- Theme toggle (dark/light)
+- Branding panel lateral (hidden no mobile)
+- Logo mobile
+- Loading state no submit
+- Integração com `authService.login()` e `sessionService.setUser()`
+- Navegação para `/sectors/select` após sucesso
+
+### Design
+
+- Layout split: branding (emerald gradient) à esquerda, form à direita
+- Responsivo: branding oculto em mobile, form centralizado
+- Dark mode completo via classes Tailwind `dark:`
+- Acessibilidade: labels, aria-label, role="alert", aria-live
