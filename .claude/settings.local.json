@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\George Floyd\\\\Desktop\\\\LumenFlow\" -Name | Where-Object { $_ -ne '.git' })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\George Floyd\\\\Desktop\\\\lumenflow-api\" -Name | Where-Object { $_ -ne '.git' -and $_ -ne 'vendor' })",
+      "PowerShell(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\George Floyd\\\\Desktop\\\\LumenFlow\\\\backend\" -Force)",
+      "PowerShell($source = \"C:\\\\Users\\\\George Floyd\\\\Desktop\\\\lumenflow-api\"; $dest = \"C:\\\\Users\\\\George Floyd\\\\Desktop\\\\LumenFlow\\\\backend\"; Get-ChildItem $source -Force | Where-Object { $_.Name -ne '.git' -and $_.Name -ne 'vendor' } | ForEach-Object { Copy-Item $_.FullName $dest -Recurse -Force })"
+    ]
+  }
+}
