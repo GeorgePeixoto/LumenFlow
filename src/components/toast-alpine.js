@@ -22,7 +22,7 @@ export function registerToastStore(Alpine) {
   Alpine.store('toast', {
     toasts: [],
 
-    show({ message, type = 'info', duration = Config.TOAST_DURATION_MS }) {
+    show(message, type = 'info', duration = Config.TOAST_DURATION_MS) {
       const id = ++_toastId;
       const toast = { id, message, type, visible: true };
       this.toasts.push(toast);

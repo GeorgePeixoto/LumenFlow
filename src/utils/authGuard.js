@@ -52,7 +52,7 @@ async function validateRemote() {
   // Evita chamadas paralelas (ex: múltiplos links clicados rapidamente)
   if (_pendingCheck) return _pendingCheck;
 
-  _pendingCheck = httpClient.get('/users/me')
+  _pendingCheck = httpClient.get('/auth/me')
     .then((user) => {
       _lastRemoteCheck = Date.now();
       if (user) sessionService.setUser(user);

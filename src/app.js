@@ -11,6 +11,7 @@ import { requireAuth,
 import { AppShell }              from './components/AppShell.js';
 import { sessionService }      from './services/sessionService.js';
 import { AUTH_EXPIRED_EVENT }  from './services/httpClient.js';
+import { bootstrapAlpine }     from './bootstrap.js';
 
 import { renderRegisterPageAlpine }        from './pages/register-alpine.js';
 import { renderLoginPageAlpine }           from './pages/login-alpine.js';
@@ -37,6 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('ef_theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
   if (savedTheme === 'dark') document.documentElement.classList.add('dark');
+
+  // Registrar stores e componentes Alpine globais
+  document.addEventListener('alpine:init', () => {
+    bootstrapAlpine(window.Alpine);
+  });
 
   // Captura global de promises rejeitadas não tratadas
   window.addEventListener('unhandledrejection', (e) => {

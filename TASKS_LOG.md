@@ -654,3 +654,75 @@ Grep por imports de arquivos deletados retorna zero resultados. Nenhuma referên
 2. **Removida pasta `src/i18n/`** — não mais importada por nenhum arquivo
 
 3. **Verificação final** — zero imports quebrados no projeto
+
+---
+
+## TASK 4.1 — Bootstrap Alpine (registrar stores e componentes globais)
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+- Criado `src/bootstrap.js` que importa e chama `registerToastStore`, `registerSessionStore`, `registerAlertsStore`, `registerRealtimeStore`
+- Adicionado listener `alpine:init` no `app.js` que chama `bootstrapAlpine(window.Alpine)` antes do Alpine processar o DOM
+- Adicionado container de toast global no `index.html` (`x-data="toastContainer"`)
+
+### Impacto
+
+Todos os `Alpine.store('toast')`, `Alpine.store('session')`, `Alpine.store('alerts')`, `Alpine.store('realtime')` agora funcionam corretamente em runtime.
+
+---
+
+## TASK 4.2 — Corrigir assinatura do Toast `show()`
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Alterado `src/components/toast-alpine.js`:
+- `show({ message, type, duration })` → `show(message, type = 'info', duration)`
+- Agora compatível com todos os callers que usam `show('msg', 'type')`
+
+---
+
+## TASK 4.3 — Corrigir endpoint do AuthGuard
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Alterado `src/utils/authGuard.js`:
+- `httpClient.get('/users/me')` → `httpClient.get('/auth/me')`
+- Agora bate com a rota real do Laravel (`GET /api/auth/me`)
+
+---
+
+## TASK 4.4 — Corrigir mapeamento de KPIs do Dashboard
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Alterado `src/pages/dashboard-alpine.js` em `loadKpis()`:
+- `data.consumption_kwh` → `data.month_kwh`
+- `data.estimated_cost` → `data.monthly_cost`
+- Variações agora multiplicadas por 100 (backend retorna decimal 0.05 = 5%)
+
+---
+
+## TASK 4.5 — Corrigir formato do Chart e Top Sectors
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Alterado `src/pages/dashboard-alpine.js`:
+- `loadChart()`: transforma `response.data` (array de `{ period, total_kwh }`) em `{ labels, values }`
+- `loadTopSectors()`: usa `s.total_kwh` em vez de `s.consumption_kwh`
+
+Agora o frontend consome corretamente o formato retornado pelo `ConsumptionService` do Laravel.

@@ -77,13 +77,13 @@ export function registerDashboardPage(Alpine) {
       try {
         const data = await dashboardService.getKpis();
         this.kpis.consumption = {
-          value: formatKwh(data?.consumption_kwh, 0).replace(' kWh', ''),
-          variation: data?.consumption_variation,
+          value: formatKwh(data?.month_kwh, 0).replace(' kWh', ''),
+          variation: data?.consumption_variation != null ? data.consumption_variation * 100 : null,
           loading: false,
         };
         this.kpis.cost = {
-          value: formatCurrency(data?.estimated_cost).replace('R$ ', ''),
-          variation: data?.cost_variation,
+          value: formatCurrency(data?.monthly_cost).replace('R$ ', ''),
+          variation: data?.cost_variation != null ? data.cost_variation * 100 : null,
           loading: false,
         };
         this.kpis.alerts = { value: String(data?.open_alerts ?? 0), loading: false };
@@ -118,13 +118,14 @@ export function registerDashboardPage(Alpine) {
 
       try {
         const periodRange = this._getPeriodRange();
-        const data = await dashboardService.getConsumptionChart(periodRange);
-        const labels = data?.labels || [];
-        const values = data?.values || [];
+        const response = await dashboardService.getConsumptionChart(periodRange);
+        const raw = response?.data || response || [];
 
-        if (!labels.length) {
+        if (!raw.length) {
           this.chartEmpty = true;
         } else {
+          const labels = raw.map(r => r.period);
+          const values = raw.map(r => r.total_kwh);
           this.chartData = { labels, datasets: [{ label: 'Consumo (kWh)', data: values }] };
         }
       } catch (err) {
@@ -147,7 +148,7 @@ export function registerDashboardPage(Alpine) {
           this.sectorsEmpty = true;
         } else {
           const labels = sectors.map(s => s.name);
-          const values = sectors.map(s => s.consumption_kwh ?? s.consumption ?? 0);
+          const values = sectors.map(s => s.total_kwh ?? 0);
           this.sectorsData = { labels, datasets: [{ label: 'kWh', data: values }] };
         }
       } catch (err) {
