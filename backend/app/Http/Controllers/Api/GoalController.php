@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Goal;
+use App\Services\GoalProjectionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -76,6 +77,22 @@ class GoalController extends Controller
         $goal->delete();
 
         return response()->json(['message' => 'Meta removida com sucesso.']);
+    }
+
+    public function projections(Request $request, GoalProjectionService $projectionService): JsonResponse
+    {
+        $projections = $projectionService->projectAll($request->user());
+
+        return response()->json(['projections' => $projections]);
+    }
+
+    public function projection(Request $request, Goal $goal, GoalProjectionService $projectionService): JsonResponse
+    {
+        $this->authorizeUser($request, $goal);
+
+        $projection = $projectionService->project($goal, $request->user());
+
+        return response()->json($projection);
     }
 
     private function authorizeUser(Request $request, Goal $goal): void
