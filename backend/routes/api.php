@@ -59,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('alerts', AlertController::class)->only(['index', 'show']);
 
     // Metas
+    Route::get('/goals/projections', [GoalController::class, 'projections']);
+    Route::get('/goals/{goal}/projection', [GoalController::class, 'projection']);
     Route::apiResource('goals', GoalController::class);
 
     // Tarifas

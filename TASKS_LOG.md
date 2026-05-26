@@ -161,3 +161,123 @@ Integrado ao `firebase:sync` — alertas gerados automaticamente após cada sync
 php artisan tinker → detectAll() → {"overload":1,"off_hours":3,"night_waste":3,"anomaly":0}
 php artisan test → 24 testes, PASSED
 ```
+
+---
+
+## TASK 1.26 — GoalProjectionService
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criado `app/Services/GoalProjectionService.php` com lógica de projeção de metas:
+
+| Método | Propósito |
+|--------|-----------|
+| `projectAll(User)` | Projeta todas as metas ativas do usuário |
+| `project(Goal, User)` | Projeção individual: calcula taxa diária, valor projetado, status |
+| `calculateCurrentValue(Goal, User)` | Calcula valor atual baseado no escopo (global/sector/device) e unidade (kwh/reais/percent) |
+| `getConsumptionKwh(Goal, User, from, to)` | Busca consumo real no período, filtrado por escopo |
+| `determineProjectionStatus(Goal, projectedProgress)` | Classifica: on_track (<80%), warning (80-99%), at_risk (≥100%) |
+
+### Endpoints adicionados
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/api/goals/projections` | Projeção de todas as metas ativas |
+| GET | `/api/goals/{goal}/projection` | Projeção de uma meta específica |
+
+### Resposta da API
+
+```json
+{
+  "goal_id": 1,
+  "name": "Limite mensal de consumo",
+  "scope": "global",
+  "unit": "kwh",
+  "target_value": 5000.00,
+  "current_value": 2340.50,
+  "projected_value": 3890.25,
+  "daily_rate": 150.03,
+  "progress": 46.8,
+  "projected_progress": 77.8,
+  "days_elapsed": 16,
+  "days_remaining": 15,
+  "days_total": 31,
+  "projection_status": "on_track",
+  "period_start": "2026-05-01",
+  "period_end": "2026-05-31"
+}
+```
+
+### Lógica de projeção
+
+1. Calcula consumo real no período decorrido (baseado em `consumption_readings`)
+2. Deriva taxa diária média (`current_value / days_elapsed`)
+3. Projeta para o período total (`daily_rate * total_days`)
+4. Compara projeção com a meta para determinar status
+
+### Arquivos criados/alterados
+
+- `backend/app/Services/GoalProjectionService.php` (novo)
+- `backend/app/Http/Controllers/Api/GoalController.php` (adicionados métodos `projections` e `projection`)
+- `backend/routes/api.php` (adicionadas 2 rotas)
+
+---
+
+## TASK 1.29 — tests/Unit/ConsumptionServiceTest.php
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criado `tests/Unit/ConsumptionServiceTest.php` com 8 testes cobrindo todos os métodos do ConsumptionService:
+
+| Teste | Método testado | O que valida |
+|-------|---------------|-------------|
+| `test_get_kpis_with_readings` | getKpis() | KPIs corretos com leituras (today, month, power, cost, devices) |
+| `test_get_kpis_empty_returns_zeros` | getKpis() | Retorna zeros quando não há leituras |
+| `test_get_consumption_chart_groups_by_day` | getConsumptionChart() | Agrupamento por dia com campos period, total_kwh, avg_power_w |
+| `test_get_top_sectors_ranking` | getTopSectors() | Ranking correto (maior consumo primeiro) |
+| `test_get_monthly_projection` | getMonthlyProjection() | Estrutura da projeção com campos obrigatórios |
+| `test_get_accumulated_by_sector` | getAccumulatedBySector() | Acumulado por setor com nome e total_kwh |
+| `test_multi_tenant_isolation` | getKpis() | Dados de outro usuário não aparecem |
+
+### Verificação
+
+```bash
+php vendor/bin/phpunit --testsuite=Unit → 8 testes, 32 assertions, PASSED
+```
+
+---
+
+## TASK 1.30 — tests/Unit/AlertDetectionServiceTest.php
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criado `tests/Unit/AlertDetectionServiceTest.php` com 11 testes cobrindo todos os métodos do AlertDetectionService:
+
+| Teste | Método testado | O que valida |
+|-------|---------------|-------------|
+| `test_detect_overload_creates_alert` | detectOverload() | Cria alerta quando consumo > threshold_red |
+| `test_detect_overload_skips_below_threshold` | detectOverload() | Não cria alerta quando consumo está normal |
+| `test_detect_overload_respects_cooldown` | detectOverload() | Não duplica alerta dentro do cooldown de 2h |
+| `test_detect_off_hours_creates_alert` | detectOffHours() | Cria alerta quando há consumo >500W fora do horário |
+| `test_detect_off_hours_skips_during_business_hours` | detectOffHours() | Não cria alerta durante horário comercial |
+| `test_detect_night_waste_creates_alert` | detectNightWaste() | Cria alerta quando há consumo >300W entre 22h-6h |
+| `test_detect_night_waste_skips_daytime` | detectNightWaste() | Não cria alerta durante o dia |
+| `test_detect_anomaly_creates_alert` | detectAnomaly() | Cria alerta quando consumo > 2x a média de 7 dias |
+| `test_detect_anomaly_skips_normal_consumption` | detectAnomaly() | Não cria alerta quando consumo está dentro do normal |
+| `test_detect_all_runs_all_detections` | detectAll() | Retorna array com as 4 chaves de detecção |
+| `test_multi_tenant_isolation` | detectOverload() | Dados de outro usuário não geram alertas |
+
+### Verificação
+
+```bash
+php vendor/bin/phpunit → 42 testes, 109 assertions, PASSED (suite completa)
+```
