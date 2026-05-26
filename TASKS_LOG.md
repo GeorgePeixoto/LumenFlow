@@ -777,3 +777,55 @@ Removidos 11 arquivos de componentes Alpine que não eram importados nem referen
 `app-shell-alpine.js`, `chart-wrapper-alpine.js`, `confirm-dialog-alpine.js`, `data-table-alpine.js`, `empty-state-alpine.js`, `error-state-alpine.js`, `kpi-card-alpine.js`, `modal-alpine.js`, `period-picker-alpine.js`, `spinner-alpine.js`, `theme-toggle.js`
 
 Mantidos: `AppShell.js` (usado pelo router) e `toast-alpine.js` (registrado globalmente via bootstrap).
+
+---
+
+## TASK 6.1 — Remover arquivos órfãos
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Removidos:
+- `src/services/firebaseRealtimeService.js` — duplicava funcionalidade do `firebase.js`
+- `design-system.html` — referenciava CSS deletados, sem utilidade
+
+---
+
+## TASK 6.2 — Configuração Tailwind inline
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Adicionado bloco `tailwind.config` no `index.html`:
+- `darkMode: 'class'` — confirma estratégia de dark mode
+- `fontFamily.sans: ['Inter']` — fonte padrão
+- `colors.primary` — paleta emerald (50-900) como cor primária do projeto
+
+---
+
+## TASK 6.3 — Criar pasta `wokwi/`
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criada pasta `wokwi/` com `README.md` documentando:
+- Estrutura esperada (diagram.json, sketch.ino)
+- Formato dos dados enviados ao Firebase (`sensores/{setor}` e `dashboard/readings/live`)
+- Instruções de uso com o simulador Wokwi
+
+---
+
+## TASK 6.4 — Consolidar serviço Firebase
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+O duplicado `firebaseRealtimeService.js` foi removido na Task 6.1. O único serviço Firebase é `src/services/firebase.js` (SSE + polling fallback), importado pelo store `realtime.js`.
