@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Login Page Template (Alpine.js + Tailwind)
  *
  * Renderiza o HTML da página de login com Alpine directives.
@@ -201,4 +201,5 @@ export function renderLoginPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

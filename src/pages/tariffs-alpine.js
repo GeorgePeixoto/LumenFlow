@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Tariffs Page (Alpine.js + Tailwind)
  *
  * CRUD de tarifas de energia.
@@ -161,4 +161,5 @@ export function renderTariffsPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

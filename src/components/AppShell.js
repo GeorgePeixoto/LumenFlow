@@ -158,6 +158,9 @@ export const AppShell = (() => {
 
     _content = _shell.querySelector('#app-content');
 
+    // Inicializar Alpine no shell dinâmico
+    window.Alpine?.initTree(_shell);
+
     _shell.querySelector('#app-shell-logout-btn')?.addEventListener('click', () => performLogout());
   }
 

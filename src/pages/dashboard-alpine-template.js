@@ -15,6 +15,7 @@ export function renderDashboardPageAlpine(container) {
   }
 
   container.innerHTML = getDashboardHTML();
+  window.Alpine?.initTree(container);
 }
 
 function getDashboardHTML() {

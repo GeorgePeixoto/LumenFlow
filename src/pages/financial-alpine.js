@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Financial Page (Alpine.js + Tailwind)
  *
  * Painel financeiro: resumo, custo diário, ranking de setores.
@@ -136,4 +136,5 @@ export function renderFinancialPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

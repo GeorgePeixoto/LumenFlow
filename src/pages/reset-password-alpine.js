@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Reset Password Page (Alpine.js + Tailwind)
  *
  * Recebe token via query string. Campos: nova senha + confirmação.
@@ -90,6 +90,7 @@ export function registerResetPasswordPage(Alpine) {
       this.darkMode = !this.darkMode;
       const theme = this.darkMode ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.toggle('dark', this.darkMode);
       localStorage.setItem('ef_theme', theme);
     },
   }));
@@ -199,4 +200,5 @@ export function renderResetPasswordPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Alerts Page (Alpine.js + Tailwind)
  *
  * Central de alertas com filtros, ações (acknowledge/resolve).
@@ -168,4 +168,5 @@ export function renderAlertsPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

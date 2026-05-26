@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Register Page Template (Alpine.js + Tailwind)
  */
 
@@ -181,4 +181,5 @@ export function renderRegisterPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

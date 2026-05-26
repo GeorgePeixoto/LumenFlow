@@ -57,11 +57,12 @@ export function registerDashboardPage(Alpine) {
 
     get realtimePower() {
       const rt = Alpine.store('realtime');
-      return rt?.currentPower ?? null;
+      return rt?.totalPower ?? null;
     },
 
     // ── Init ────────────────────────────────────────────────
     init() {
+      Alpine.store('realtime')?.startListening();
       this.loadKpis();
       this.loadGoals();
       this.loadChart();

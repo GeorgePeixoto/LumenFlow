@@ -13,11 +13,11 @@ import { sessionService }      from './services/sessionService.js';
 import { AUTH_EXPIRED_EVENT }  from './services/httpClient.js';
 import { bootstrapAlpine }     from './bootstrap.js';
 
-import { renderRegisterPageAlpine }        from './pages/register-alpine.js';
-import { renderLoginPageAlpine }           from './pages/login-alpine.js';
+import { renderRegisterPageAlpine }        from './pages/register-alpine-template.js';
+import { renderLoginPageAlpine }           from './pages/login-alpine-template.js';
 import { renderForgotPasswordPageAlpine }  from './pages/forgot-password-alpine.js';
 import { renderResetPasswordPageAlpine }   from './pages/reset-password-alpine.js';
-import { renderDashboardPageAlpine }       from './pages/dashboard-alpine.js';
+import { renderDashboardPageAlpine }       from './pages/dashboard-alpine-template.js';
 import { renderSectorsPageAlpine }         from './pages/sectors-alpine.js';
 import { renderDevicesPageAlpine }         from './pages/devices-alpine.js';
 import { renderDeviceDetailPageAlpine }    from './pages/device-detail-alpine.js';

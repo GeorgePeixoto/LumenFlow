@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Transparency Page (Alpine.js + Tailwind)
  *
  * TV Mode / Painel de transparência com semáforo por setor.
@@ -140,4 +140,5 @@ export function renderTransparencyPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Sectors Page (Alpine.js + Tailwind)
  *
  * CRUD de setores com tabela, busca, modal de criação/edição, desativação.
@@ -280,4 +280,5 @@ export function renderSectorsPageAlpine(container) {
 
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

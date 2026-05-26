@@ -41,19 +41,19 @@ export function registerToastStore(Alpine) {
     },
 
     success(message, duration) {
-      this.show({ message, type: 'success', duration });
+      this.show(message, 'success', duration);
     },
 
     error(message, duration) {
-      this.show({ message, type: 'error', duration });
+      this.show(message, 'error', duration);
     },
 
     warning(message, duration) {
-      this.show({ message, type: 'warning', duration });
+      this.show(message, 'warning', duration);
     },
 
     info(message, duration) {
-      this.show({ message, type: 'info', duration });
+      this.show(message, 'info', duration);
     },
   });
 

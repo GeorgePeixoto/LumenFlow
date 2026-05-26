@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Goals Page (Alpine.js + Tailwind)
  *
  * CRUD de metas com progresso visual e projeções.
@@ -176,4 +176,5 @@ export function renderGoalsPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

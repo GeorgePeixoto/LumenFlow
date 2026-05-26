@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Sector Select Page (Alpine.js + Tailwind)
  *
  * Página pós-login para selecionar o setor ativo.
@@ -99,4 +99,5 @@ export function renderSectorSelectPageAlpine(container) {
 
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Devices Page (Alpine.js + Tailwind)
  *
  * CRUD de dispositivos com tabela, busca, filtro por setor, modal.
@@ -233,4 +233,5 @@ export function renderDevicesPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

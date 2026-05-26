@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Device Detail Page (Alpine.js + Tailwind)
  *
  * Detalhes do dispositivo: info, leituras (chart placeholder), anomalias, manutenção.
@@ -263,4 +263,5 @@ export function renderDeviceDetailPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

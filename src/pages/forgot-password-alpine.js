@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Forgot Password Page (Alpine.js + Tailwind)
  *
  * Campo de e-mail + mensagem genérica de sucesso (prevenção de user enumeration).
@@ -55,6 +55,7 @@ export function registerForgotPasswordPage(Alpine) {
       this.darkMode = !this.darkMode;
       const theme = this.darkMode ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.toggle('dark', this.darkMode);
       localStorage.setItem('ef_theme', theme);
     },
   }));
@@ -139,4 +140,5 @@ export function renderForgotPasswordPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

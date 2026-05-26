@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Settings Page (Alpine.js + Tailwind)
  *
  * Configuração de horário comercial (business hours).
@@ -107,4 +107,5 @@ export function renderSettingsPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }

@@ -144,6 +144,7 @@ export function registerLoginPage(Alpine) {
       this.darkMode = !this.darkMode;
       const theme = this.darkMode ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.toggle('dark', this.darkMode);
       localStorage.setItem('ef_theme', theme);
     },
   }));

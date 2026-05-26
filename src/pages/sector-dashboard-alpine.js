@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LumenFlow — Sector Dashboard Page (Alpine.js + Tailwind)
  *
  * Dashboard individual de um setor: KPIs, dispositivos, alertas.
@@ -146,4 +146,5 @@ export function renderSectorDashboardPageAlpine(container) {
   </div>
 </div>
 `;
+  window.Alpine?.initTree(container);
 }
