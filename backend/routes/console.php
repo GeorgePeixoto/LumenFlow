@@ -14,6 +14,6 @@ Artisan::command('inspire', function () {
 |--------------------------------------------------------------------------
 */
 Schedule::command('firebase:sync')
-    ->everyFiveMinutes()
+    ->everyFiveSeconds()
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/firebase-sync.log'));

@@ -345,3 +345,74 @@ Criados dois arquivos para a versão Alpine.js + Tailwind da página de login:
 - Responsivo: branding oculto em mobile, form centralizado
 - Dark mode completo via classes Tailwind `dark:`
 - Acessibilidade: labels, aria-label, role="alert", aria-live
+
+---
+
+## TASK 2.25 — Página Dashboard (Alpine + Tailwind)
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criados dois arquivos para a versão Alpine.js + Tailwind do dashboard:
+
+| Arquivo | Propósito |
+|---------|-----------|
+| `src/pages/dashboard-alpine.js` | Componente Alpine.data('dashboardPage') com toda a lógica reativa |
+| `src/pages/dashboard-alpine-template.js` | Função `renderDashboardPageAlpine(container)` com HTML Tailwind |
+
+### Seções implementadas
+
+1. **KPI Cards** (consumo, custo, alertas, dispositivos) — loading skeleton, variação %
+2. **Goal Progress** — barra de progresso com cores por status (verde/amarelo/vermelho)
+3. **Gráfico de consumo** — period picker (hoje/7d/30d), loading/error/empty states, canvas Chart.js
+4. **Top 5 setores** — bar chart horizontal com loading/error/empty states
+5. **Alertas recentes** — lista com severity dots, click para navegar
+6. **Alertas fora de horário** — contagem + lista
+7. **Desperdício noturno** — contagem + lista
+8. **Real-time power** — indicador com ping animation (dados do Firebase store)
+9. **Atalhos rápidos** — grid de links (transparência, setores, dispositivos, alertas)
+
+### Critérios de aceite
+
+- KPIs com loading state e dados reais via `dashboardService`
+- Gráfico atualiza ao mudar período
+- Empty/error states com retry
+- Integração com `Alpine.store('realtime')` para potência instantânea
+- Arquivo de lógica com ~230 linhas (distribuído entre stores e componentes)
+
+---
+
+## TASK 3.9 — Configurar Laravel Scheduler
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Ajustado o scheduler em `backend/routes/console.php`:
+- Intervalo alterado de `everyFiveMinutes()` para `everyFiveSeconds()`
+- `withoutOverlapping()` mantido para evitar execuções concorrentes
+- Output redirecionado para `storage/logs/firebase-sync.log`
+
+Adicionado logging com timestamp no command `SyncFirebaseReadings`:
+- Cada execução loga `[YYYY-MM-DD HH:MM:SS]` + mensagem + quantidade de registros
+
+### Critérios de aceite
+
+- ✅ Command executa a cada 5 segundos via `php artisan schedule:work`
+- ✅ Dados do Firebase persistem em `consumption_readings` no MySQL
+- ✅ Não duplica registros (check `exists()` por sector_id + read_at)
+- ✅ Loga cada sync com timestamp e quantidade de registros
+
+---
+
+## TASK 3.10 — Detecção automática de alertas no sync job
+
+**Status**: ✅ Concluída (já implementada)
+**Data**: 2026-05-26
+
+### O que foi feito
+
+O command `firebase:sync` já integra a detecção automática de alertas via `AlertDetectionService::detectAll()` após cada sync bem-sucedido. Executa para todos os usuários e loga quantidade de alertas gerados por usuário.
