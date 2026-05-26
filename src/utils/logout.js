@@ -19,8 +19,6 @@
 import { authService }        from '../services/authService.js';
 import { sessionService }     from '../services/sessionService.js';
 import { invalidateSessionCache } from './authGuard.js';
-import { Toast }              from '../components/Toast.js';
-import { t }                  from '../i18n/pt-BR.js';
 import Router                 from './router.js';
 
 /** Flag para evitar logout duplo (ex: clique duplo no botão). */
@@ -46,6 +44,6 @@ export async function performLogout() {
     _loggingOut = false;
   }
 
-  Toast.show({ message: t('auth.logout.success'), type: 'info' });
+  window.Alpine?.store('toast')?.show('Logout realizado.', 'info');
   Router.navigate('/login');
 }

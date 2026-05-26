@@ -416,3 +416,241 @@ Adicionado logging com timestamp no command `SyncFirebaseReadings`:
 ### O que foi feito
 
 O command `firebase:sync` já integra a detecção automática de alertas via `AlertDetectionService::detectAll()` após cada sync bem-sucedido. Executa para todos os usuários e loga quantidade de alertas gerados por usuário.
+
+---
+
+## TASK 3.14 — Criar `.env.example` no Laravel
+
+**Status**: ✅ Concluída (já existente)
+**Data**: 2026-05-26
+
+### O que foi feito
+
+O arquivo `backend/.env.example` já existia com todas as configurações necessárias: APP, DB (MySQL), Firebase RTDB, CORS (FRONTEND_URL), mail, cache, session.
+
+---
+
+## TASK 3.13 — Documentar endpoints da API
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Criado `docs/API.md` com documentação completa de todos os 50 endpoints da API:
+
+| Grupo | Endpoints |
+|-------|-----------|
+| Auth | register, login, forgot-password, reset-password, logout, me |
+| Dashboard | kpis, consumption, top-sectors, projection |
+| Sectors | CRUD completo (apiResource) |
+| Devices | CRUD + readings + anomalies |
+| Alerts | index, show, summary, count, acknowledge, resolve |
+| Goals | CRUD + projections |
+| Tariffs | CRUD completo |
+| Business Hours | index, upsert (2 aliases) |
+| Financial | summary, daily, ranking |
+| Consumption | index, summary, by-sector, hourly |
+| Firebase Sync | sync (manual), preview |
+
+Inclui: payloads de request/response, query params, códigos de erro, notas sobre autenticação e paginação.
+
+---
+
+## TASK 3.12 — Atualizar README.md
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Atualizado `README.md` com:
+- Seção de pré-requisitos (PHP 8.3+, MySQL 8.4+, Composer)
+- Instruções detalhadas de configuração do `.env` (DB + Firebase + CORS)
+- Correção do intervalo do scheduler (5 minutos → 5 segundos)
+- Comando `php artisan schedule:work` para desenvolvimento
+- Link para `docs/API.md` na seção de documentação
+
+---
+
+## TASK 3.15 — Rodar `php artisan test` — 100% passando
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### Resultado
+
+```
+42 testes, 109 assertions, PASSED (4.7s)
+```
+
+Suites: Feature (24 testes) + Unit (18 testes). Zero falhas, zero warnings.
+
+---
+
+## TASK 2.26 — Converter todas as páginas restantes para Alpine.js + Tailwind
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Convertidas todas as 14 páginas restantes do frontend para Alpine.js + Tailwind CSS, seguindo o padrão `registerXxxPage(Alpine)` + `renderXxxPageAlpine(container)`:
+
+| Arquivo criado | Página |
+|----------------|--------|
+| `src/pages/login-alpine.js` | Login |
+| `src/pages/register-alpine.js` | Cadastro (com máscara CNPJ) |
+| `src/pages/forgot-password-alpine.js` | Esqueci a senha |
+| `src/pages/reset-password-alpine.js` | Redefinir senha |
+| `src/pages/sector-select-alpine.js` | Seleção de setor |
+| `src/pages/sectors-alpine.js` | CRUD de setores |
+| `src/pages/devices-alpine.js` | CRUD de dispositivos |
+| `src/pages/device-detail-alpine.js` | Detalhe do dispositivo (tabs: leituras, anomalias, manutenção) |
+| `src/pages/alerts-alpine.js` | Lista de alertas com filtros |
+| `src/pages/goals-alpine.js` | CRUD de metas com progresso |
+| `src/pages/financial-alpine.js` | Painel financeiro |
+| `src/pages/tariffs-alpine.js` | CRUD de tarifas |
+| `src/pages/settings-alpine.js` | Configuração de horário comercial |
+| `src/pages/transparency-alpine.js` | Painel TV com semáforo por setor |
+| `src/pages/sector-dashboard-alpine.js` | Dashboard individual do setor |
+
+### Padrão seguido
+
+- Cada arquivo exporta `registerXxxPage(Alpine)` e `renderXxxPageAlpine(container)`
+- Componentes usam `Alpine.data()` com estado reativo
+- Templates usam classes Tailwind (dark mode via `dark:` prefix)
+- Loading/error/empty states em todas as páginas
+- Modais para CRUD (create/edit) com validação inline
+- Integração com services existentes (`httpClient`, `deviceService`, `sectorService`, etc.)
+
+---
+
+## TASK 2.27 — Atualizar `app.js` para usar páginas Alpine
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Reescrito `src/app.js` para:
+- Importar todas as versões Alpine (`*-alpine.js`) em vez das legacy
+- Remover imports de: `installMocks`, `Toast`, `t`, `registerOffHoursPlugin`, `alertPolling`, `initAlertDetailModal`
+- Remover chamadas: `installMocks()`, `registerOffHoursPlugin()`, `initAlertDetailModal()`, `alertPolling.start()`
+- Todas as rotas agora chamam `renderXxxPageAlpine(container)`
+- Adicionado suporte a dark mode class (`document.documentElement.classList.add('dark')`)
+- Placeholder de "Relatórios" simplificado com Tailwind
+
+### Impacto
+
+O frontend agora depende exclusivamente das páginas Alpine.js + Tailwind. As páginas legacy e o sistema de mocks podem ser removidos nas próximas tasks (3.1-3.8).
+
+---
+
+## TASK 3.1 — Remover pasta `mocks/`
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Deletada a pasta `src/mocks/` com 3 arquivos: `install.js`, `mockData.js`, `mockHandler.js`. O `app.js` já não importa nem chama `installMocks()`.
+
+---
+
+## TASK 3.2 — Remover CSS legacy
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Deletada toda a pasta `src/styles/` (23 arquivos CSS). Removidos os 23 `<link rel="stylesheet">` do `index.html`. Adicionado Alpine.js CDN e estilos mínimos inline (`[x-cloak]`, font-family).
+
+---
+
+## TASK 3.3 — Remover componentes legacy
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Deletados 21 componentes PascalCase legacy: AlertBadge, AlertDetailModal, Button, Chart, Checkbox, ConfirmDialog, DataTable, EmptyState, ErrorState, FormField, GoalProgress, Input, KpiCard, Modal, PageHeader, PasswordInput, PeriodPicker, Select, Spinner, Textarea, Toast.
+
+Mantidos: `AppShell.js` (ainda usado pelo router/authGuard) e todos os componentes Alpine (`*-alpine.js`).
+
+---
+
+## TASK 3.4 — Remover utilitários legacy
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Deletados 7 utilitários não mais importados: `eventBus.js`, `alertPolling.js`, `offHoursPlugin.js`, `periodSync.js`, `goalMilestoneCheck.js`, `termsModal.js`, `debounce.js`.
+
+Mantidos: `router.js`, `authGuard.js`, `formatters.js`, `dates.js`, `validators.js`, `storage.js`, `logout.js` (ainda usados pelo app, AppShell ou páginas Alpine).
+
+---
+
+## TASK 3.5 — Remover páginas legacy
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Deletadas todas as 16 páginas legacy originais (sem sufixo `-alpine`). O `app.js` já importa exclusivamente as versões Alpine.
+
+---
+
+## TASK 3.6 — Limpar `index.html`
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+- Removidos 23 `<link rel="stylesheet">` apontando para CSS deletados
+- Adicionado `<script defer>` do Alpine.js CDN
+- Adicionado `<style>` com `[x-cloak] { display: none !important; }` e `font-family: Inter`
+- Mantidos: Tailwind CDN, Chart.js CDN, Google Fonts, `app.js` module
+
+---
+
+## TASK 3.7 — Corrigir imports quebrados após cleanup
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Corrigidos 2 arquivos que importavam `Toast` (componente deletado):
+
+- `src/utils/logout.js` — removido import de `Toast` e `t`, substituído `Toast.show(...)` por `window.Alpine?.store('toast')?.show(...)`
+- `src/stores/session.js` — removido import de `Toast` e `t`, substituído `Toast.show(...)` por `Alpine.store('toast')?.show(...)`
+
+### Verificação
+
+Grep por imports de arquivos deletados retorna zero resultados. Nenhuma referência quebrada no projeto.
+
+---
+
+## TASK 3.8 — Migrar AppShell para Tailwind + remover i18n
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+1. **Reescrito `src/components/AppShell.js`** — substituído DOM imperativo + classes CSS custom por HTML com Tailwind inline:
+   - Sidebar responsiva (mobile drawer + desktop collapsible)
+   - Header com toggle de tema (dark/light), avatar dropdown com logout
+   - Navegação com highlight do item ativo
+   - Mesma API pública mantida (`mount`, `unmount`, `setActivePath`, `updateUser`, `isMounted`, `getContentArea`)
+
+2. **Removida pasta `src/i18n/`** — não mais importada por nenhum arquivo
+
+3. **Verificação final** — zero imports quebrados no projeto

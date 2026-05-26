@@ -55,6 +55,13 @@ LumenFlow/
 
 ## Como Executar
 
+### Pré-requisitos
+
+- PHP 8.3+
+- MySQL 8.4+
+- Composer
+- Servidor local para frontend (Live Server, http-server, etc.)
+
 ### Frontend
 
 1. Abra um servidor local na raiz (ex: Live Server no VS Code)
@@ -69,6 +76,20 @@ cd backend
 composer install
 cp .env.example .env
 php artisan key:generate
+```
+
+Configure o `.env` com suas credenciais MySQL e Firebase RTDB URL:
+```
+DB_DATABASE=lumenflow
+DB_USERNAME=root
+DB_PASSWORD=
+
+FIREBASE_RTDB_URL=https://seu-projeto.firebaseio.com
+FRONTEND_URL=http://localhost:5500
+```
+
+Depois rode as migrations e inicie o servidor:
+```bash
 php artisan migrate --seed
 php artisan serve
 ```
@@ -82,7 +103,13 @@ cd backend
 php artisan firebase:sync
 ```
 
-Roda automaticamente a cada 5 minutos via scheduler (`php artisan schedule:work`).
+Roda automaticamente a cada 5 segundos via scheduler (`php artisan schedule:work`).
+
+Para rodar o scheduler em desenvolvimento:
+```bash
+cd backend
+php artisan schedule:work
+```
 
 ## Funcionalidades
 
@@ -96,6 +123,7 @@ Roda automaticamente a cada 5 minutos via scheduler (`php artisan schedule:work`
 
 ## Documentação
 
+- [docs/API.md](docs/API.md) — Documentação completa dos endpoints da API
 - [TASKS.md](TASKS.md) — Planejamento completo de desenvolvimento
 - [TASKS_LOG.md](TASKS_LOG.md) — Registro detalhado de cada task concluída
 - [REFACTORING_PLAN.md](REFACTORING_PLAN.md) — Plano de refatoração da stack

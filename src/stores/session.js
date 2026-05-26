@@ -6,8 +6,6 @@
  */
 import { authService } from '../services/authService.js';
 import { sessionService } from '../services/sessionService.js';
-import { Toast } from '../components/Toast.js';
-import { t } from '../i18n/pt-BR.js';
 
 export function registerSessionStore(Alpine) {
   Alpine.store('session', {
@@ -50,7 +48,7 @@ export function registerSessionStore(Alpine) {
       this.token = null;
       this.user = null;
       sessionService.destroy();
-      Toast.show({ message: t('auth.logout.success'), type: 'info' });
+      Alpine.store('toast')?.show('Logout realizado.', 'info');
     },
 
     updateUser(user) {
