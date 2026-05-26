@@ -45,6 +45,11 @@ class Device extends Model
         return $this->hasMany(Alert::class);
     }
 
+    public function maintenances(): HasMany
+    {
+        return $this->hasMany(DeviceMaintenance::class);
+    }
+
     // ─── Scopes ──────────────────────────────────────────────
 
     public function scopeActive($query)

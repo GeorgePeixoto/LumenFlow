@@ -726,3 +726,54 @@ Alterado `src/pages/dashboard-alpine.js`:
 - `loadTopSectors()`: usa `s.total_kwh` em vez de `s.consumption_kwh`
 
 Agora o frontend consome corretamente o formato retornado pelo `ConsumptionService` do Laravel.
+
+---
+
+## TASK 5.1 — Rotas bulk actions para alertas
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+- Adicionados métodos `bulkAcknowledge()` e `bulkResolve()` no `AlertController`
+- Ambos recebem `{ ids: [1, 2, 3] }` e atualizam apenas alertas do usuário autenticado
+- Rotas: `PATCH /api/alerts/bulk/acknowledge` e `PATCH /api/alerts/bulk/resolve`
+
+---
+
+## TASK 5.2 — Rotas de manutenção de dispositivos
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+- Criada migration `create_device_maintenances_table` (id, device_id, date, type, notes, timestamps)
+- Criado model `DeviceMaintenance` com relação `belongsTo(Device)`
+- Adicionada relação `maintenances()` no model `Device`
+- Adicionados métodos `maintenance()` e `storeMaintenance()` no `DeviceController`
+- Rotas: `GET /api/devices/{id}/maintenance` e `POST /api/devices/{id}/maintenance`
+
+---
+
+## TASK 5.3 — Registro Alpine via `alpine:init`
+
+**Status**: ✅ Concluída (feita na Task 4.1)
+**Data**: 2026-05-26
+
+O listener `alpine:init` foi adicionado no `app.js` como parte da Task 4.1, garantindo que stores inicializem antes de qualquer `x-data`.
+
+---
+
+## TASK 5.4 — Remover componentes Alpine não utilizados
+
+**Status**: ✅ Concluída
+**Data**: 2026-05-26
+
+### O que foi feito
+
+Removidos 11 arquivos de componentes Alpine que não eram importados nem referenciados por nenhuma página:
+`app-shell-alpine.js`, `chart-wrapper-alpine.js`, `confirm-dialog-alpine.js`, `data-table-alpine.js`, `empty-state-alpine.js`, `error-state-alpine.js`, `kpi-card-alpine.js`, `modal-alpine.js`, `period-picker-alpine.js`, `spinner-alpine.js`, `theme-toggle.js`
+
+Mantidos: `AppShell.js` (usado pelo router) e `toast-alpine.js` (registrado globalmente via bootstrap).

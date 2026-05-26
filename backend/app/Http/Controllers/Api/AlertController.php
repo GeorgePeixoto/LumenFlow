@@ -89,6 +89,30 @@ class AlertController extends Controller
         return response()->json(['count' => $query->count()]);
     }
 
+    public function bulkAcknowledge(Request $request): JsonResponse
+    {
+        $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer']]);
+
+        $count = $request->user()->alerts()
+            ->whereIn('id', $request->ids)
+            ->where('status', 'open')
+            ->update(['status' => 'acknowledged', 'acknowledged_at' => now()]);
+
+        return response()->json(['updated' => $count]);
+    }
+
+    public function bulkResolve(Request $request): JsonResponse
+    {
+        $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer']]);
+
+        $count = $request->user()->alerts()
+            ->whereIn('id', $request->ids)
+            ->whereIn('status', ['open', 'acknowledged'])
+            ->update(['status' => 'resolved', 'resolved_at' => now()]);
+
+        return response()->json(['updated' => $count]);
+    }
+
     private function authorizeUser(Request $request, Alert $alert): void
     {
         if ($alert->user_id !== $request->user()->id) {

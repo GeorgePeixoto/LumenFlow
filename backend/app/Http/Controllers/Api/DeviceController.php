@@ -107,6 +107,30 @@ class DeviceController extends Controller
         return response()->json(['anomalies' => $alerts]);
     }
 
+    public function maintenance(Request $request, Device $device): JsonResponse
+    {
+        $this->authorizeUser($request, $device);
+
+        $records = $device->maintenances()->orderByDesc('date')->get();
+
+        return response()->json(['records' => $records]);
+    }
+
+    public function storeMaintenance(Request $request, Device $device): JsonResponse
+    {
+        $this->authorizeUser($request, $device);
+
+        $validated = $request->validate([
+            'date' => ['required', 'date'],
+            'type' => ['required', 'string', 'max:100'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $record = $device->maintenances()->create($validated);
+
+        return response()->json(['record' => $record], 201);
+    }
+
     private function authorizeUser(Request $request, Device $device): void
     {
         if ($device->sector->user_id !== $request->user()->id) {

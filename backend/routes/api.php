@@ -49,11 +49,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dispositivos
     Route::get('/devices/{device}/readings', [DeviceController::class, 'readings']);
     Route::get('/devices/{device}/anomalies', [DeviceController::class, 'anomalies']);
+    Route::get('/devices/{device}/maintenance', [DeviceController::class, 'maintenance']);
+    Route::post('/devices/{device}/maintenance', [DeviceController::class, 'storeMaintenance']);
     Route::apiResource('devices', DeviceController::class);
 
     // Alertas
     Route::get('/alerts/summary', [AlertController::class, 'summary']);
     Route::get('/alerts/count', [AlertController::class, 'count']);
+    Route::patch('/alerts/bulk/acknowledge', [AlertController::class, 'bulkAcknowledge']);
+    Route::patch('/alerts/bulk/resolve', [AlertController::class, 'bulkResolve']);
     Route::patch('/alerts/{alert}/acknowledge', [AlertController::class, 'acknowledge']);
     Route::patch('/alerts/{alert}/resolve', [AlertController::class, 'resolve']);
     Route::apiResource('alerts', AlertController::class)->only(['index', 'show']);
