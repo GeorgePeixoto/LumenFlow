@@ -37,8 +37,8 @@ class SensorDataController extends Controller
     }
 
     /**
-     * GET /api/dashboard
-     * Obtém dados agregados para o dashboard
+     * GET /api/dashboard/public
+     * Obtém dados agregados para o dashboard (público)
      */
     public function getDashboard(): JsonResponse
     {
@@ -50,6 +50,32 @@ class SensorDataController extends Controller
                 'error' => $result['message']
             ], 404);
         }
+
+        return response()->json($result);
+    }
+
+    /**
+     * GET /api/dashboard (protegido)
+     * Obtém dados agregados para o dashboard com autenticação
+     */
+    public function getAuthenticatedDashboard(): JsonResponse
+    {
+        $result = $this->firebaseRtdbService->getAllDevicesData();
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'error' => $result['message']
+            ], 404);
+        }
+
+        // Adicionar informações do usuário autenticado
+        $user = auth()->user();
+        $result['user'] = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+        ];
 
         return response()->json($result);
     }

@@ -2,71 +2,58 @@
 
 namespace App\Services;
 
-use Kreait\Firebase\Factory;
-use Kreait\Firebase\Database;
 use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 
 class FirebaseRtdbService
 {
-    private Database $database;
     private string $rtdbUrl;
+    private string $apiKey;
+    private Client $client;
 
     public function __construct()
     {
         $this->rtdbUrl = config('firebase.rtdb_url');
+        $this->apiKey = config('firebase.auth.api_key');
 
-        $factory = (new Factory)
-            ->withServiceAccount(config('firebase.credentials'))
-            ->withDatabaseUri($this->rtdbUrl);
-
-        $this->database = $factory->createDatabase();
+        $this->client = new Client([
+            'verify' => false, // Desativar verificação SSL para desenvolvimento
+            'timeout' => 30,
+        ]);
     }
 
     /**
-     * Salva dados no Firebase RTDB
+     * Obtém dados de todos os dispositivos
      */
-    public function setData(string $path, $data): array
+    public function getAllDevicesData(): array
     {
         try {
-            $reference = $this->database->getReference($path);
-            $reference->set($data);
+            $url = $this->rtdbUrl . '/sensores.json';
 
-            return [
-                'success' => true,
-                'message' => 'Dados salvos com sucesso',
-                'path' => $path
-            ];
-        } catch (\Exception $e) {
-            Log::error('Erro ao salvar dados no Firebase: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
-        }
-    }
+            if ($this->apiKey) {
+                $url .= '?auth=' . $this->apiKey;
+            }
 
-    /**
-     * Obtém dados do Firebase RTDB
-     */
-    public function getData(string $path): array
-    {
-        try {
-            $reference = $this->database->getReference($path);
-            $snapshot = $reference->getSnapshot();
+            $response = $this->client->get($url);
+            $data = json_decode($response->getBody()->getContents(), true);
 
-            if ($snapshot->exists()) {
+            if ($data) {
+                // Processar dados para o dashboard
+                $processedData = $this->processDashboardData($data);
+
                 return [
                     'success' => true,
-                    'data' => $snapshot->getValue(),
-                    'path' => $path
+                    'data' => $processedData,
+                    'devices' => array_keys($data)
                 ];
             }
 
             return [
                 'success' => false,
-                'message' => 'Nenhum dado encontrado no caminho: ' . $path
+                'message' => 'Nenhum dispositivo encontrado'
             ];
-        } catch (\Exception $e) {
+        } catch (RequestException $e) {
             Log::error('Erro ao obter dados do Firebase: ' . $e->getMessage());
             return [
                 'success' => false,
@@ -76,33 +63,26 @@ class FirebaseRtdbService
     }
 
     /**
-     * Obtém dados de sensores de um dispositivo específico
+     * Obtém dados de um dispositivo específico
      */
     public function getSensorData(string $deviceId, ?int $limit = null): array
     {
         try {
-            $path = "sensors/{$deviceId}/readings";
-            $reference = $this->database->getReference($path);
-            $snapshot = $reference->getSnapshot();
+            $url = $this->rtdbUrl . "/sensores/{$deviceId}.json";
 
-            if ($snapshot->exists()) {
-                $data = $snapshot->getValue();
+            if ($this->apiKey) {
+                $url .= '?auth=' . $this->apiKey;
+            }
 
-                // Ordenar por timestamp (mais recente primeiro)
-                if (is_array($data)) {
-                    krsort($data);
+            $response = $this->client->get($url);
+            $data = json_decode($response->getBody()->getContents(), true);
 
-                    // Limitar número de resultados
-                    if ($limit && count($data) > $limit) {
-                        $data = array_slice($data, 0, $limit, true);
-                    }
-                }
-
+            if ($data) {
                 return [
                     'success' => true,
-                    'data' => $data,
+                    'data' => [$data],
                     'device_id' => $deviceId,
-                    'count' => is_array($data) ? count($data) : 0
+                    'count' => 1
                 ];
             }
 
@@ -110,7 +90,7 @@ class FirebaseRtdbService
                 'success' => false,
                 'message' => "Nenhum dado encontrado para o dispositivo {$deviceId}"
             ];
-        } catch (\Exception $e) {
+        } catch (RequestException $e) {
             Log::error('Erro ao obter dados do sensor: ' . $e->getMessage());
             return [
                 'success' => false,
@@ -120,33 +100,26 @@ class FirebaseRtdbService
     }
 
     /**
-     * Obtém dados de todos os dispositivos
+     * Salva dados no Firebase
      */
-    public function getAllDevicesData(): array
+    public function setData(string $path, $data): array
     {
         try {
-            $reference = $this->database->getReference("sensors");
-            $snapshot = $reference->getSnapshot();
+            $url = $this->rtdbUrl . "/{$path}.json";
 
-            if ($snapshot->exists()) {
-                $data = $snapshot->getValue();
-
-                // Processar dados para o dashboard
-                $processedData = $this->processDashboardData($data);
-
-                return [
-                    'success' => true,
-                    'data' => $processedData,
-                    'devices' => array_keys($data ?? [])
-                ];
+            if ($this->apiKey) {
+                $url .= '?auth=' . $this->apiKey;
             }
 
+            $response = $this->client->put($url, json_encode($data));
+
             return [
-                'success' => false,
-                'message' => 'Nenhum dispositivo encontrado'
+                'success' => true,
+                'message' => 'Dados salvos com sucesso',
+                'path' => $path
             ];
-        } catch (\Exception $e) {
-            Log::error('Erro ao obter dados de todos os dispositivos: ' . $e->getMessage());
+        } catch (RequestException $e) {
+            Log::error('Erro ao salvar dados no Firebase: ' . $e->getMessage());
             return [
                 'success' => false,
                 'error' => $e->getMessage()
@@ -164,40 +137,48 @@ class FirebaseRtdbService
             'active_devices' => 0,
             'total_readings' => 0,
             'latest_readings' => [],
-            'devices_status' => []
+            'devices_status' => [],
+            'setor_data' => []
         ];
 
-        foreach ($sensorsData as $deviceId => $readings) {
+        foreach ($sensorsData as $deviceId => $sensorData) {
             $dashboard['total_devices']++;
 
-            if (is_array($readings) && isset($readings['readings'])) {
-                $latestReading = null;
-                $readingCount = 0;
-
-                // Ordenar e pegar o mais recente
-                krsort($readings['readings']);
-                $firstKey = key($readings['readings']);
-                if ($firstKey) {
-                    $latestReading = $readings['readings'][$firstKey];
-                    $latestReading['timestamp'] = $firstKey;
-                    $readingCount = count($readings['readings']);
-                }
-
-                // Verificar se o dispositivo está ativo (última leitura < 5 minutos)
-                $isActive = $latestReading && (time() - $latestReading['timestamp']) < 300;
+            if ($sensorData) {
+                $timestamp = $sensorData['timestamp'] ?? time();
+                $isActive = (time() - $timestamp) < 300; // Ativo se última leitura < 5 minutos
 
                 $dashboard['active_devices'] += $isActive ? 1 : 0;
-                $dashboard['total_readings'] += $readingCount;
+                $dashboard['total_readings']++;
 
-                if ($latestReading) {
-                    $dashboard['latest_readings'][$deviceId] = $latestReading;
-                }
+                $dashboard['latest_readings'][$deviceId] = [
+                    'nome' => $sensorData['nome'] ?? $deviceId,
+                    'potencia' => $sensorData['potencia'] ?? 0,
+                    'energia_kwh' => $sensorData['energia_kwh'] ?? 0,
+                    'timestamp' => $timestamp
+                ];
 
                 $dashboard['devices_status'][$deviceId] = [
                     'active' => $isActive,
-                    'last_reading' => $latestReading['timestamp'] ?? null,
-                    'readings_count' => $readingCount
+                    'last_reading' => $timestamp,
+                    'readings_count' => 1
                 ];
+
+                // Adicionar dados por setor
+                if (isset($sensorData['nome'])) {
+                    $setor = $sensorData['nome'];
+                    if (!isset($dashboard['setor_data'][$setor])) {
+                        $dashboard['setor_data'][$setor] = [
+                            'total_potencia' => 0,
+                            'total_energia_kwh' => 0,
+                            'devices' => []
+                        ];
+                    }
+
+                    $dashboard['setor_data'][$setor]['total_potencia'] += $sensorData['potencia'] ?? 0;
+                    $dashboard['setor_data'][$setor]['total_energia_kwh'] += $sensorData['energia_kwh'] ?? 0;
+                    $dashboard['setor_data'][$setor]['devices'][] = $deviceId;
+                }
             }
         }
 

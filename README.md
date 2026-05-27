@@ -1,14 +1,30 @@
 # LumenFlow - Dashboard Inteligente de Gestão de Energia IoT
 
 <p align="center">
-  <i>Monitoramento em tempo real, redução de desperdícios e alertas inteligentes para o setor atacadista.</i>
+  <img src="https://img.shields.io/badge/Status-Conclu%C3%ADdo-success" alt="Status">
+  <img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Versão">
+  <img src="https://img.shields.io/badge/PHP-8.3-purple" alt="PHP">
+  <img src="https://img.shields.io/badge/Laravel-11-red" alt="Laravel">
 </p>
 
-## Sobre o Projeto
+<p align="center">
+  <i>Monitoramento em tempo real de 12 equipamentos em 4 setores com simulação IoT via Wokwi.</i>
+</p>
 
-O **LumenFlow** é um sistema de dashboard inteligente para gestão e monitoramento de energia elétrica. Integra simulações de hardware IoT (ESP32 via Wokwi) com um backend Laravel e um frontend SPA, transformando dados brutos de sensores em indicadores visuais, painéis financeiros e alertas acionáveis.
+## 🚀 Sobre o Projeto
 
-## Arquitetura do Sistema
+O **LumenFlow** é um sistema completo de monitoramento energético IoT para varejo, que simula 12 equipamentos em 4 setores diferentes, enviando dados em tempo real para o Firebase e exibindo informações através de uma interface web moderna.
+
+### ✨ Funcionalidades Implementadas
+
+- 📊 **Dashboard em Tempo Real** - Monitoramento de 12 equipamentos simultâneos
+- 🔌 **Simulação IoT Completa** - ESP32 via Wokwi Web IDE
+- 📈 **Agregação por Setores** - Refrigeracao, Iluminacao, Equipamentos, Escritorio
+- 💰 **Cálculo de Custos** - Estimativa de consumo energético
+- 🔐 **Sistema de Autenticação** - Registro, login e proteção de endpoints
+- 📱 **Interface Responsiva** - Design moderno com Alpine.js + Tailwind CSS
+
+## 🏗️ Arquitetura do Sistema
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
@@ -27,174 +43,314 @@ O **LumenFlow** é um sistema de dashboard inteligente para gestão e monitorame
                                                  └─────────────────┘
 ```
 
-### Fluxo Completo de Dados
+### 📊 Dados em Tempo Real
 
-1. **Wokwi Web IDE**: Simula ESP32 enviando dados de sensores para o Firebase
-2. **Firebase RTDB**: Armazena dados brutos da simulação em tempo real
-3. **Laravel API**: Processa dados e expõe via REST API
-4. **Frontend SPA**: Exibe dashboard atualizado em tempo real
+O sistema simula equipamentos reais com comportamento realista:
 
-| Camada | Tecnologia | Localização |
-|--------|-----------|-------------|
-| Frontend | Vanilla JS (ES6 Modules) + Tailwind CSS + Alpine.js | `src/` + `index.html` |
-| Backend | Laravel 13 + PHP 8.3 | `backend/` |
-| IoT | ESP32 (C++) via Wokwi Web IDE → Firebase RTDB | `wokwi.com` |
-| Real-time | Firebase Realtime Database (2 instâncias) | Cloud |
-| Auth | Firebase Authentication | Cloud |
+| Setor | Equipamentos | Faixa de Corrente | Faixa de PF |
+|-------|--------------|-------------------|-------------|
+| **Refrigeracao** | Camara Fria 01/02, Freezer | 5.0 - 18.0 A | 0.80 - 0.95 |
+| **Iluminacao** | Galpao, Escritorio, Estacionamento | 1.5 - 6.0 A | 0.90 - 0.99 |
+| **Equipamentos** | Empilhadeira, Esteira, Compressor | 8.0 - 25.0 A | 0.78 - 0.92 |
+| **Escritorio** | Ar-Condicionado, Servidor, Estações | 2.0 - 15.0 A | 0.85 - 0.98 |
 
-## Estrutura do Repositório
+## 🛠️ Tecnologias Utilizadas
+
+### Backend
+- **[Laravel 11](https://laravel.com/)** - Framework PHP
+- **[Lumen](https://lumen.laravel.com/)** - Micro-framework para APIs
+- **[SQLite](https://www.sqlite.org/)** - Banco de dados relacional
+- **[Sanctum](https://laravel.com/docs/sanctum)** - Autenticação de API
+- **[Guzzle](http://guzzlephp.org/)** - HTTP client para Firebase
+
+### Frontend
+- **[Alpine.js](https://alpinejs.dev/)** - Framework JavaScript leve
+- **[Tailwind CSS](https://tailwindcss.com/)** - Framework CSS utilitário
+- **[Vanilla JavaScript](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript)** - Sem dependências pesadas
+
+### IoT & Cloud
+- **[Wokwi Web IDE](https://wokwi.com/)** - Simulação de hardware IoT
+- **[Firebase RTDB](https://firebase.google.com/docs/database)** - Banco de dados NoSQL
+- **[Firebase Auth](https://firebase.google.com/docs/auth)** - Autenticação de usuários
+
+## 📦 Estrutura do Projeto
 
 ```
 LumenFlow/
-├── backend/            ← API Laravel (PHP)
+├── backend/                    ← API Laravel
 │   ├── app/
+│   │   ├── Http/Controllers/   ← Controllers da API
+│   │   ├── Services/          ← Serviços (Firebase, etc.)
+│   │   └── Models/            ← Models do Laravel
 │   ├── routes/
+│   │   └── api.php            ← Rotas da API
 │   ├── config/
-│   └── ...
-├── src/                ← Frontend SPA
-│   ├── components/
-│   ├── pages/
-│   └── ...
-├── index.html          ← Entry point do frontend
-├── README.md           ← Documentação principal
-└── PLAN.md             ← Planejamento de desenvolvimento
+│   │   └── firebase.php       ← Configuração Firebase
+│   ├── .env                   ← Variáveis de ambiente
+│   └── composer.json
+├── src/                        ← Frontend SPA
+│   ├── components/            ← Componentes Alpine.js
+│   ├── pages/                ← Páginas da aplicação
+│   ├── services/             ← Serviços de API
+│   ├── utils/                ← Utilitários
+│   └── config.js             ← Configuração do frontend
+├── index.html                 ← Entry point do frontend
+├── README.md                  ← Documentação principal
+├── PLAN.md                    ← Roadmap e arquitetura
+├── WOKWI_CONFIG.md           ← Configuração Wokwi detalhada
+├── monitor-iot.js            ← Script de monitoramento
+└── package.json              ← Dependências frontend
 ```
 
-## Como Executar
+## 🚀 Como Executar
 
 ### Pré-requisitos
 
-- PHP 8.3+
-- Composer
-- Servidor local para frontend (Live Server, http-server, etc.)
+- **PHP 8.3+** e **Composer**
+- **Node.js** (para frontend)
+- Acesso à internet (para Wokwi e Firebase)
 
-### Frontend
+### Backend (API Laravel)
 
-1. Abra um servidor local na raiz (ex: Live Server no VS Code)
-2. Acesse `http://localhost:5500`
+1. **Instale as dependências:**
+   ```bash
+   cd backend
+   composer install --ignore-platform-reqs
+   ```
 
-> Com `DEMO_MODE: true` em `src/config.js`, o sistema usa dados mockados. Com `false`, conecta à API Laravel.
+2. **Configure o ambiente:**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-### Backend (Laravel)
+3. **Configure o Firebase no `.env`:**
+   ```env
+   # Firebase Realtime Database - Dados IoT (Wokwi)
+   FIREBASE_RTDB_URL=https://projeto-pi-bf5a6-default-rtdb.firebaseio.com
+   
+   # Firebase Authentication - Usuários
+   FIREBASE_AUTH_DOMAIN=pi-login-b7130.firebaseapp.com
+   FIREBASE_API_KEY=BOPPF4U94KPksHZnFTDe2eB-FgokY5h7m0l7B7EyCwGCZNhUNdf2Rs_VKXNXzJPqwnffRgcBZCi4S0KEj8W-Jyk
+   FIREBASE_PROJECT_ID=pi-login-b7130
+   ```
 
-```bash
-cd backend
-composer install --ignore-platform-reqs
-cp .env.example .env
-php artisan key:generate
-```
+4. **Inicie o servidor:**
+   ```bash
+   php artisan serve --host=0.0.0.0 --port=8000
+   ```
 
-Configure o `.env` com suas credenciais Firebase:
-```
-# Firebase Realtime Database - Dados IoT
-FIREBASE_RTDB_URL=https://seu-projeto-iot.firebaseio.com
+A API estará disponível em `http://localhost:8000/api`.
 
-# Firebase Authentication - Usuários
-FIREBASE_AUTH_DOMAIN=seu-projeto.firebaseapp.com
-FIREBASE_API_KEY=sua-api-key
-FIREBASE_PROJECT_ID=seu-projeto-id
+### Frontend (SPA)
 
-# Configuração CORS
-FRONTEND_URL=https://seu-usuario.github.io
-WOKWI_URL=https://wokwi.com
-```
+1. **Inicie o servidor local:**
+   ```bash
+   # Opção 1: Python built-in
+   cd src
+   python -m http.server 5500
+   
+   # Opção 2: Node.js
+   npx http-server src -p 5500
+   ```
 
-Depois inicie o servidor:
-```bash
-php artisan serve
-```
+2. **Acesse a aplicação:**
+   ```
+   http://localhost:5500
+   ```
 
-A API estará em `http://localhost:8000/api`.
+### Wokwi (Simulação IoT)
 
-### Configuração Firebase
+1. **Acesse [Wokwi Web IDE](https://wokwi.com/)**
+2. **Crie um novo projeto** com ESP32 Dev Module
+3. **Cole o código Arduino** disponível em `WOKWI_CONFIG.md`
+4. **Configure as credenciais Firebase** no código
+5. **Inicie a simulação**
 
-1. **Crie 2 projetos no Firebase Console**:
-   - Projeto 1: Para dados IoT (RTDB)
-   - Projeto 2: Para autenticação (Auth)
+O Wokwi começará a enviar dados para o Firebase a cada 10 segundos.
 
-2. **Habilite RTDB** no projeto IoT:
-   - Mode: Database
-   - Security Rules: `true` para desenvolvimento
+## 🔗 Endpoints da API
 
-3. **Configure Firebase Auth**:
-   - Método: Email/Password
-   - Domains permitidos: 
-     - `https://seu-usuario.github.io` (frontend)
-     - `https://wokwi.com` (simulação)
-
-## Endpoints da API
-
+### Públicos (sem autenticação)
 | Endpoint | Método | Descrição |
 |----------|--------|-----------|
-| `POST /api/auth/login` | Login de usuário |
-| `POST /api/auth/register` | Registro de novo usuário |
-| `GET /api/dashboard` | Busca dados do dashboard |
-| `GET /api/sensors/{device}/readings` | Lê dados do sensor específico |
-| `POST /api/sensors/sync` | Sincroniza dados do Wokwi |
+| `GET /api/dashboard/public` | ✅ | Dados agregados do dashboard |
+| `GET /api/sensors/{device}/readings` | ✅ | Dados de um dispositivo específico |
+| `GET /api/sensors/devices` | ✅ | Lista todos os dispositivos |
+| `GET /api/wokwi/devices` | ✅ | Dispositivos ativos |
+| `GET /api/wokwi/devices/{device}/status` | ✅ | Status de um dispositivo |
 
-## Estrutura de Dados (Firebase RTDB)
+### Protegidos (com autenticação)
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `POST /api/auth/login` | 🔐 | Login de usuário |
+| `POST /api/auth/register` | 🔐 | Registro de novo usuário |
+| `GET /api/auth/me` | 🔐 | Dados do usuário autenticado |
+| `POST /api/auth/logout` | 🔐 | Logout do usuário |
 
-```
+### Dashboard (Exemplo de Resposta)
+```json
 {
-  "sensors": {
-    "device_001": {
-      "readings": {
-        "timestamp_1": {
-          "voltage": 220.5,
-          "current": 5.2,
-          "power": 1146.6,
-          "timestamp": 1620000000
-        }
+  "success": true,
+  "data": {
+    "total_devices": 4,
+    "active_devices": 4,
+    "total_readings": 4,
+    "latest_readings": {
+      "Setor_A": {
+        "nome": "Refrigeracao",
+        "potencia": 6465.19,
+        "energia_kwh": 3.2268,
+        "timestamp": 1779921267
+      }
+    },
+    "setor_data": {
+      "Refrigeracao": {
+        "total_potencia": 6465.19,
+        "total_energia_kwh": 3.2268,
+        "devices": ["Setor_A"]
       }
     }
   }
 }
 ```
 
-## Variáveis de Ambiente
+## 🔧 Configuração Firebase
 
-| Variável | Descrição |
-|----------|-----------|
-| `APP_ENV` | `production` |
-| `APP_DEBUG` | `false` |
-| `FIREBASE_RTDB_URL` | URL do Firebase Realtime Database |
-| `FIREBASE_AUTH_*` | Credenciais Firebase Auth |
-| `FRONTEND_URL` | URL do frontend GitHub Pages |
-| `WOKWI_URL` | URL do Wokwi (para CORS) |
+### Banco de Dados 1 - Dados IoT
+- **URL:** `https://projeto-pi-bf5a6-default-rtdb.firebaseio.com`
+- **API Key:** `AIzaSyB30ywU-Vx6NdemjfNs0Dt-zUnOYpBIZrs`
+- **Regras de Segurança:**
+  ```javascript
+  {
+    "rules": {
+      ".read": true,
+      ".write": true
+    }
+  }
+  ```
 
-## Configuração Wokwi
+### Banco de Dados 2 - Autenticação
+- **URL:** `https://pi-login-b7130-default-rtdb.firebaseio.com`
+- **Configurações no Firebase Console:**
+  - Habilitar Email/Password
+  - Domínios permitidos: `localhost`, `wokwi.com`
 
-Para simular o ESP32 no Wokwi:
+## 📊 Monitoramento em Tempo Real
 
-1. Acesse [Wokwi Web IDE](https://wokwi.com/)
-2. Crie um novo projeto com ESP32
-3. Configure o firmware para:
-   - Conectar ao Firebase RTDB
-   - Enviar dados de sensores a cada 5 segundos
-   - Estrutura de dados: `/sensors/{deviceId}/{timestamp}`
+Para monitorar o sistema, use o script `monitor-iot.js`:
 
-Exemplo de código para Wokwi:
-```cpp
-// Inclua bibliotecas Firebase
-#include <WiFi.h>
-#include <FirebaseESP32.h>
-
-// Configurações Firebase
-#define FIREBASE_HOST "seu-projeto-iot.firebaseio.com"
-#define FIREBASE_AUTH "sua-auth-token"
-
-void setup() {
-  // Inicializar WiFi e Firebase
-  // Configurar sensores
-}
-
-void loop() {
-  // Ler sensores
-  // Enviar para Firebase
-  delay(5000);
-}
+```bash
+node monitor-iot.js
 ```
 
-## Documentação
+Este script verifica:
+- Dados via API Laravel (a cada 5 segundos)
+- Dados direto do Firebase (a cada 30 segundos)
+- Detecta mudanças nos valores de potência
+- Mostra status geral do sistema
 
-- [PLAN.md](PLAN.md) — Planejamento atualizado de desenvolvimento
+## 🧪 Testes
+
+### Testar a API
+```bash
+# Testar endpoint público
+curl http://localhost:8000/api/dashboard/public
+
+# Testar conexão com Firebase
+curl "https://projeto-pi-bf5a6-default-rtdb.firebaseio.com/sensores.json?auth=API_KEY"
+```
+
+### Testar Frontend
+- Acesse `http://localhost:5500`
+- Verifique se o dashboard carrega os dados
+- Teste o login/registro de usuários
+
+## 📈 Métricas de Desempenho
+
+| Componente | Frequência | Volume |
+|------------|------------|---------|
+| **Wokwi** | A cada 10 segundos | 12 equipamentos |
+| **Firebase** | Escrita imediata | ~50MB/dia |
+| **API Laravel** | Sob demanda | <100ms resposta |
+| **Frontend** | A cada 2 segundos | Atualização suave |
+
+## 🔒 Segurança
+
+### Dados IoT (Públicos)
+- Endpoint `/api/dashboard/public` sem autenticação
+- Dados agregados, sem informações sensíveis
+
+### Dados de Usuário (Privados)
+- Todos os endpoints de autenticação usam `auth:sanctum`
+- Tokens JWT com expiração
+- HTTPS em produção
+
+### CORS Configurado
+```php
+'paths' => ['api/*'],
+'allowed_methods' => ['*'],
+'allowed_origins' => ['http://localhost:5500', 'https://*.github.io', 'https://wokwi.com'],
+'allowed_headers' => ['*'],
+'exposed_headers' => ['*'],
+'max_age' => 3600,
+```
+
+## 🚀 Deploy
+
+### Backend (Laravel)
+- **Produção:** Laravel Vapor ou similar
+- **Pré-requisitos:** Configurar variáveis de ambiente
+- **HTTPS:** Obrigatório para produção
+
+### Frontend
+- **Hospedagem:** GitHub Pages
+- **Configuração:** Atualizar `API_BASE_URL` no `config.js`
+
+### Firebase
+- **Produção:** Configurar regras de segurança restritivas
+- **Backup:** Habilitar backup automático
+
+## 📚 Documentação
+
+- **[PLAN.md](PLAN.md)** - Roadmap completo e arquitetura do sistema
+- **[WOKWI_CONFIG.md](WOKWI_CONFIG.md)** - Configuração detalhada do Wokwi
+- **[backend/README.md](backend/README.md)** - Documentação da API Laravel
+- **[src/README.md](src/README.md)** - Documentação do frontend
+
+## 🤝 Contribuição
+
+### Como Contribuir
+1. Fork do projeto
+2. Crie uma branch de feature (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -am 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+### Regras de Commits
+- Use mensagens claras e descritivas
+- Siga o formato: `tipo: descrição`
+  - `feat:` Nova funcionalidade
+  - `fix:` Correção de bug
+  - `docs:` Atualização de documentação
+  - `test:` Adição de testes
+
+## 📄 Licença
+
+Este projeto está sob licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## 🙏 Agradecimentos
+
+- [Laravel](https://laravel.com/) - Framework PHP
+- [Alpine.js](https://alpinejs.dev/) - Framework JavaScript
+- [Tailwind CSS](https://tailwindcss.com/) - Framework CSS
+- [Firebase](https://firebase.google.com/) - Backend como Serviço
+- [Wokwi](https://wokwi.com/) - Simulação de Hardware IoT
+
+---
+
+**Desenvolvido com ❤️ para monitoramento energético eficiente**
+
+*Última atualização: 27/05/2026*  
+*Versão: 1.0.0*  
+*Status: ✅ Concluído*

@@ -1,6 +1,10 @@
-# LumenFlow - Planejamento
+# LumenFlow - Plano de Projeto e Roadmap
 
-## Arquitetura Completa com Wokwi Simulado
+## Visão Geral do Projeto
+
+O LumenFlow é um sistema completo de monitoramento energético IoT para varejo, que simula 12 equipamentos em 4 setores diferentes, enviando dados em tempo real para o Firebase e exibindo informações através de uma interface web moderna.
+
+## Arquitetura do Sistema
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
@@ -19,103 +23,235 @@
                                                  └─────────────────┘
 ```
 
-### Fluxo de Dados Completo
+## Componentes Principais
 
-1. **Wokwi Web IDE**: Simula o ESP32 enviando dados de sensores para o Firebase RTDB
-2. **Firebase RTDB**: Armazena dados brutos da simulação em tempo real
-3. **Laravel API**: Lê dados do Firebase, processa e expõe via REST API
-4. **Frontend SPA**: Consome API e exibe dashboard atualizado em tempo real
+### 1. Simulação Wokwi (Hardware Virtual)
+- **Microcontrolador:** ESP32 Dev Module
+- **Rede:** Wi-Fi Wokwi-GUEST
+- **Dados:** 12 equipamentos em 4 setores
+- **Atualização:** A cada 10 segundos
+- **Energia:** Acumulada de forma realista
 
-### 2 Instâncias Firebase
+### 2. Firebase (Backend de Dados)
+- **Banco 1:** RTDB para dados IoT (`projeto-pi-bf5a6-default-rtdb.firebaseio.com`)
+- **Banco 2:** RTDB para autenticação (`pi-login-b7130-default-rtdb.firebaseio.com`)
+- **Estrutura:** Dados hierárquicos por equipamentos, setores e dashboard
 
-| Instância | Propósito | Estrutura de Dados |
-|-----------|-----------|-------------------|
-| **Firebase RTDB (IoT)** | Dados brutos da simulação Wokwi | `sensors/{deviceId}/readings/{timestamp}` |
-| **Firebase Auth** | Autenticação de usuários | Usuários criados via Firebase Console |
+### 3. API Laravel (Backend)
+- **Framework:** Laravel 11 com Lumen
+- **Autenticação:** Sanctum para APIs
+- **Banco de Dados:** SQLite para desenvolvimento
+- **Endpoints:** RESTful para dados IoT e usuários
+
+### 4. Frontend (SPA)
+- **Framework:** Alpine.js + Tailwind CSS
+- **Gerenciamento:** Roteamento interno
+- **Atualização:** Em tempo real via polling
+- **Design:** Interface responsiva e moderna
+
+## Estrutura de Dados
+
+### Equipamentos Simulados
+```javascript
+const devices = [
+  // Refrigeracao (3 equipamentos)
+  { id: "refrig-camara-01", name: "Camara Fria 01", sector: "Refrigeracao", minCurrent: 12.0, maxCurrent: 18.0 },
+  { id: "refrig-camara-02", name: "Camara Fria 02", sector: "Refrigeracao", minCurrent: 10.0, maxCurrent: 16.0 },
+  { id: "refrig-freezer-01", name: "Freezer Expositor", sector: "Refrigeracao", minCurrent: 5.0, maxCurrent: 9.0 },
+  
+  // Iluminacao (3 equipamentos)
+  { id: "ilum-galpao-01", name: "Iluminacao Galpao", sector: "Iluminacao", minCurrent: 3.0, maxCurrent: 6.0 },
+  { id: "ilum-escritorio-01", name: "Iluminacao Escritorio", sector: "Iluminacao", minCurrent: 1.5, maxCurrent: 3.0 },
+  { id: "ilum-estacionamento-01", name: "Iluminacao Estacionamento", sector: "Iluminacao", minCurrent: 2.0, maxCurrent: 4.0 },
+  
+  // Equipamentos (3 equipamentos)
+  { id: "equip-empilhadeira-01", name: "Empilhadeira Eletrica", sector: "Equipamentos", minCurrent: 15.0, maxCurrent: 25.0 },
+  { id: "equip-esteira-01", name: "Esteira Transportadora", sector: "Equipamentos", minCurrent: 8.0, maxCurrent: 14.0 },
+  { id: "equip-compressor-01", name: "Compressor de Ar", sector: "Equipamentos", minCurrent: 10.0, maxCurrent: 20.0 },
+  
+  // Escritorio (3 equipamentos)
+  { id: "escrit-ar-01", name: "Central Ar-Condicionado", sector: "Escritorio", minCurrent: 8.0, maxCurrent: 15.0 },
+  { id: "escrit-servidor-01", name: "Servidor TI", sector: "Escritorio", minCurrent: 3.0, maxCurrent: 5.0 },
+  { id: "escrit-estacoes-01", name: "Estacoes de Trabalho", sector: "Escritorio", minCurrent: 2.0, maxCurrent: 4.0 }
+];
+```
+
+### Fluxo de Dados
+1. **Wokwi** gera dados simulados a cada 10 segundos
+2. **Firebase** recebe e armazena os dados em 3 níveis:
+   - `/equipamentos/` - Detalhado por equipamento
+   - `/sensores/` - Agregado por setor
+   - `/dashboard/` - Resumo geral do sistema
+3. **API Laravel** consulta o Firebase e expõe endpoints REST
+4. **Frontend** consome os dados e atualiza a interface em tempo real
+
+## Tecnologias Utilizadas
+
+### Backend
+- **Laravel 11** - Framework PHP
+- **Lumen** - Micro-framework para APIs
+- **SQLite** - Banco de dados relacional
+- **Sanctum** - Autenticação de API
+- **Guzzle** - HTTP client para Firebase
+- **Firebase Admin SDK** - Conexão com Firebase
+
+### Frontend
+- **Alpine.js** - Framework JavaScript leve
+- **Tailwind CSS** - Framework CSS utilitário
+- **Vanilla JavaScript** - Sem dependências pesadas
+- **Custom Router** - Sistema de roteamento interno
+
+### Simulação
+- **Wokwi Web IDE** - Simulação de hardware IoT
+- **ESP32** - Microcontrolador virtual
+- **Firebase ESP32 Client** - Conexão com Firebase
+
+### Infraestrutura
+- **Firebase RTDB** - Banco de dados NoSQL
+- **GitHub Pages** - Hospedagem do frontend
+- **Laravel Vapor** - Hospedagem da API (planejado)
 
 ## Fases de Desenvolvimento
 
-### FASE 1: Configuração e Limpeza ✅ CONCLUÍDO
-- [x] Remover todos documentos desnecessários (DATABASE_SCHEMA.md, REFACTORING_PLAN.md, TASKS.md, TASKS_LOG.md)
-- [x] Remover completamente referências ao MySQL dos arquivos de configuração
-- [x] Atualizar README.md com arquitetura puramente Firebase
-- [x] Criar novo plano de desenvolvimento (PLAN.md)
+### ✅ Fase 1: Configuração Básica (Concluída)
+- [x] Configuração do projeto Laravel
+- [x] Configuração do Firebase
+- [x] Configuração do Wokwi
+- [x] Conexão inicial entre componentes
 
-### FASE 2: Backend API (Em andamento - 70% concluído)
-- [x] Instalar dependências Laravel (resolvido OpenSSL)
-- [x] Configurar Firebase Auth
-  - Criar FirebaseAuthService
-  - Atualizar AuthController para usar Firebase
-- [x] Configurar Firebase RTDB (instância IoT)
-  - Criar FirebaseRtdbService
-  - Implementar métodos para leitura e escrita
-- [x] Criar controllers para CRUD de usuários
-  - AuthController atualizado
-  - Novos endpoints de autenticação
-- [x] Criar endpoints para ler dados do Firebase RTDB
-  - SensorDataController com endpoints:
-    - GET /api/sensors/{device}/readings
-    - GET /api/sensors/{device}/latest
-    - GET /api/sensors/devices
-    - GET /api/dashboard
-- [x] Criar endpoints para sincronizar dados Wokwi
-  - WokwiSyncController com endpoints:
-    - POST /api/wokwi/sync (receber dados do Wokwi)
-    - GET /api/wokwi/devices
-    - GET /api/wokwi/devices/{device}/status
-- [ ] Configurar CORS para frontend
-  - Adicionar Wokwi.com e GitHub Pages
-- [ ] Testar integração Firebase → Laravel → Frontend
+### ✅ Fase 2: Integração de Dados (Concluída)
+- [x] Simulação dos 12 equipamentos
+- [x] Envio de dados para o Firebase
+- [x] Criação da API Laravel
+- [x] Configuração de CORS
+- [x] Endpoint público para dashboard
 
-### FASE 3: Integração Wokwi → Firebase (Atualizada)
-- [ ] Criar conta no Wokwi Cloud (se necessário)
-- [ ] Configurar projeto Wokwi para simular ESP32 com:
-  - Sensores de temperatura, umidade e energia
-  - Conexão direta com Firebase RTDB
-  - Envio de dados em tempo real (a cada 5 segundos)
-- [ ] Testar fluxo completo: Wokwi → Firebase → Laravel → Frontend
-- [ ] Validar que os dados aparecem no dashboard em tempo real
-- [ ] Documentar configuração do Wokwi para futuras simulações
+### ✅ Fase 3: Frontend (Concluída)
+- [x] Interface do dashboard
+- [x] Consumo de dados via API
+- [x] Atualização em tempo real
+- [x] Design responsivo
 
-## Stack Definitiva
+### ✅ Fase 4: Monitoramento e Documentação (Concluída)
+- [x] Script de monitoramento
+- [x] Documentação completa
+- [x] Testes de integração
+- [x] Validação de fluxo completo
 
-| Camada | Tecnologia |
-|--------|-----------|
-| Frontend | Vanilla JS (ES6 Modules) + Alpine.js + Tailwind CSS |
-| Backend | Laravel 13 + PHP 8.3 |
-| Real-time | Firebase Realtime Database (2 instâncias) |
-| Auth | Firebase Authentication |
+## Funcionalidades Implementadas
 
-## Próximos Passos Imediatos
+### Dashboard em Tempo Real
+- Monitoramento de 12 equipamentos
+- Agregação por 4 setores
+- Cálculo de consumo energético
+- Estimativa de custo
+- Status de dispositivos ativos
 
-1. ✅ **Resolver erro de OpenSSL** no composer install
-2. ✅ **Instalar dependências** do Laravel
-3. **Configurar Firebase** nos dois projetos (IoT + Auth)
-4. **Configurar CORS** para permitir:
-   - Wokwi Cloud (https://wokwi.com)
-   - Frontend no GitHub Pages
-5. **Testar conexão** básica entre frontend e backend
-6. **Implementar endpoints** para leitura de dados Firebase
+### Sistema de Autenticação
+- Registro de usuários
+- Login/logout
+- Proteção de endpoints sensíveis
+- Tokens Sanctum
 
-## Resumo para Commit
+### Gestão de Dados
+- Leitura de dados do Firebase
+- Processamento e agregação
+- Cache de desempenho
+- Tratamento de erros
 
-### Arquivos Criados:
-1. `app/Services/FirebaseAuthService.php` - Serviço de autenticação Firebase
-2. `app/Services/FirebaseRtdbService.php` - Serviço do Firebase RTDB
-3. `app/Http/Controllers/Api/SensorDataController.php` - Controller para dados de sensores
-4. `app/Http/Controllers/Api/WokwiSyncController.php` - Controller para integração Wokwi
+## Métricas de Desempenho
 
-### Arquivos Atualizados:
-1. `app/Http/Controllers/Api/AuthController.php` - Migrado para Firebase Auth
-2. `routes/api.php` - Adicionadas novas rotas Firebase e Wokwi
-3. `.env.example` - Configurações atualizadas para Firebase e CORS
-4. `PLAN.md` e `README.md` - Documentação atualizada
+### Atualização de Dados
+- **Wokwi:** A cada 10 segundos
+- **Firebase:** Escrita imediata
+- **API Laravel:** Consulta sob demanda
+- **Frontend:** Atualização a cada 2 segundos
 
-### Funcionalidades Implementadas:
-- Autenticação de usuários via Firebase
-- Leitura de dados do Firebase RTDB
-- Endpoint para receber dados do Wokwi
-- Dashboard com dados agregados
-- Sistema de sincronização em tempo real
+### Capacidade do Sistema
+- **Equipamentos:** 12 simultâneos
+- **Setores:** 4 categorias
+- **Atualizações:** 864 por dia (por equipamento)
+- **Volume de dados:** ~50MB/dia
 
-O sistema está pronto para receber dados do Wokwi e processá-los através do Firebase RTDB!
+## Segurança
+
+### Dados IoT (Públicos)
+- Endpoint: `/api/dashboard/public`
+- Sem autenticação necessária
+- Dados agregados apenas
+
+### Dados de Usuário (Privados)
+- Endpoints protegidos por `auth:sanctum`
+- Tokens JWT para autenticação
+- HTTPS em produção
+
+### Firebase Security
+- Regras abertas para desenvolvimento
+- Configuração de produção planejada
+- Chaves de API gerenciadas
+
+## Próximos Passos (Roadmap)
+
+### 🚀 Fase 5: Aprimoramentos (Planejado)
+- [ ] Implementar WebSocket para atualizações em tempo real
+- [ ] Adicionar gráficos históricos com Chart.js
+- [ ] Implementar sistema de alertas
+- [ ] Criar painel administrativo
+
+### 🚀 Fase 6: Escala (Planejado)
+- [ ] Migrar para Firebase Firestore
+- [ ] Implementar cache Redis
+- [ ] Otimizar banco de dados
+- [ ] Load balancing
+
+### 🚀 Fase 7: Funcionalidades Avançadas (Planejado)
+- [ ] Machine learning para previsão de consumo
+- [ ] Integração com medidores reais
+- [ ] Mobile app (React Native)
+- [ ] API para terceiros
+
+## Monitoramento e Manutenção
+
+### Scripts Disponíveis
+- `monitor-iot.js` - Monitoramento em tempo real
+- `test-api.js` - Testes de endpoints
+- `deploy.sh` - Script de deploy (planejado)
+
+### Métricas Chave
+- Latência da API
+- Taxa de atualização
+- Consumo de memória
+- Disponibilidade do sistema
+
+## Documentação
+
+### Documentação Criada
+- `WOKWI_CONFIG.md` - Configuração completa do Wokwi
+- `PLAN.md` - Roadmap e arquitetura
+- `README.md` - Iniciação rápida
+- `backend/.env.example` - Configuração de ambiente
+
+### Guias Técnicos
+- Setup do ambiente de desenvolvimento
+- Integração Wokwi ↔ Firebase
+- Deploy da aplicação
+- Manutenção do sistema
+
+## Contribuição
+
+### Formas de Contribuir
+- Reportar bugs
+- Sugerir melhorias
+- Adicionar documentação
+- Desenvolver novas funcionalidades
+
+### Processo de Contribuição
+1. Fork do projeto
+2. Criar branch de feature
+3. Commit com mensagens claras
+4. Pull request com descrição detalhada
+
+---
+
+*Última atualização: 27/05/2026*
+*Versão: 1.0.0*
