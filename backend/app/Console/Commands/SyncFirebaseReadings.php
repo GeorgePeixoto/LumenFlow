@@ -11,7 +11,7 @@ class SyncFirebaseReadings extends Command
 {
     protected $signature = 'firebase:sync {--sector= : ID do setor específico} {--no-alerts : Pular detecção de alertas}';
 
-    protected $description = 'Sincroniza leituras de sensores do Firebase RTDB para o MySQL e detecta alertas';
+    protected $description = 'Sincroniza leituras de sensores do Firebase RTDB e detecta alertas';
 
     public function handle(FirebaseSyncService $syncService, AlertDetectionService $alertService): int
     {
