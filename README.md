@@ -12,8 +12,8 @@ O **LumenFlow** é um sistema de dashboard inteligente para gestão e monitorame
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   Wokwi ESP32   │────▶│  Firebase RTDB   │◀────│  Frontend SPA   │
-│  (simulação)    │     │  (dados IoT)     │────▶│  (GitHub Pages) │
+│   Wokwi ESP32   │────▶│ Firebase RTDB    │◀────│  Frontend SPA   │
+│  (simulação)    │     │  (dados IoT)     │     │  (GitHub Pages) │
 └─────────────────┘     └──────────────────┘     └────────┬────────┘
                                                           │
                                                           │ REST API
@@ -21,16 +21,19 @@ O **LumenFlow** é um sistema de dashboard inteligente para gestão e monitorame
                                                  ┌─────────────────┐
                                                  │  Laravel API     │
                                                  │  (backend/)      │
-                                                 │  + MySQL         │
+                                                 │    +            │
+                                                 │ Firebase Auth    │
+                                                 │  (usuários)     │
                                                  └─────────────────┘
 ```
 
 | Camada | Tecnologia | Localização |
 |--------|-----------|-------------|
 | Frontend | Vanilla JS (ES6 Modules) + Tailwind CSS + Alpine.js | `src/` + `index.html` |
-| Backend | Laravel 13 + PHP 8.3 + MySQL 8.4 | `backend/` |
+| Backend | Laravel 13 + PHP 8.3 | `backend/` |
 | IoT | ESP32 (C++) via Wokwi → Firebase RTDB | `wokwi/` |
-| Real-time | Firebase Realtime Database | Cloud |
+| Real-time | Firebase Realtime Database (2 instâncias) | Cloud |
+| Auth | Firebase Authentication | Cloud |
 
 ## Estrutura do Repositório
 
@@ -38,19 +41,16 @@ O **LumenFlow** é um sistema de dashboard inteligente para gestão e monitorame
 LumenFlow/
 ├── backend/            ← API Laravel (PHP)
 │   ├── app/
-│   ├── database/
 │   ├── routes/
-│   ├── tests/
+│   ├── config/
 │   └── ...
 ├── src/                ← Frontend SPA
 │   ├── components/
 │   ├── pages/
-│   ├── services/
 │   └── ...
-├── wokwi/              ← Firmware ESP32
 ├── index.html          ← Entry point do frontend
-├── TASKS.md            ← Planejamento de tasks
-└── TASKS_LOG.md        ← Registro de execução
+├── README.md           ← Documentação principal
+└── PLAN.md             ← Planejamento de desenvolvimento
 ```
 
 ## Como Executar
@@ -58,7 +58,6 @@ LumenFlow/
 ### Pré-requisitos
 
 - PHP 8.3+
-- MySQL 8.4+
 - Composer
 - Servidor local para frontend (Live Server, http-server, etc.)
 
@@ -73,111 +72,84 @@ LumenFlow/
 
 ```bash
 cd backend
-composer install
+composer install --ignore-platform-reqs
 cp .env.example .env
 php artisan key:generate
 ```
 
-Configure o `.env` com suas credenciais MySQL e Firebase RTDB URL:
+Configure o `.env` com suas credenciais Firebase:
 ```
-DB_DATABASE=lumenflow
-DB_USERNAME=root
-DB_PASSWORD=
+# Firebase Realtime Database - Dados IoT
+FIREBASE_RTDB_URL=https://seu-projeto-iot.firebaseio.com
 
-FIREBASE_RTDB_URL=https://seu-projeto.firebaseio.com
+# Firebase Authentication - Usuários
+FIREBASE_AUTH_DOMAIN=seu-projeto.firebaseapp.com
+FIREBASE_API_KEY=sua-api-key
+FIREBASE_PROJECT_ID=seu-projeto-id
+
 FRONTEND_URL=http://localhost:5500
 ```
 
-Depois rode as migrations e inicie o servidor:
+Depois inicie o servidor:
 ```bash
-php artisan migrate --seed
 php artisan serve
 ```
 
 A API estará em `http://localhost:8000/api`.
 
-### Sincronização Firebase → MySQL
+### Configuração Firebase
 
-```bash
-cd backend
-php artisan firebase:sync
+1. **Crie 2 projetos no Firebase Console**:
+   - Projeto 1: Para dados IoT (RTDB)
+   - Projeto 2: Para autenticação (Auth)
+
+2. **Habilite RTDB** no projeto IoT:
+   - Mode: Database
+   - Security Rules: `true` para desenvolvimento
+
+3. **Configure Firebase Auth**:
+   - Método: Email/Password
+   - Domains permitidos: `http://localhost:5500`
+
+## Endpoints da API
+
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `POST /api/auth/login` | Login de usuário |
+| `POST /api/auth/register` | Registro de novo usuário |
+| `GET /api/dashboard` | Busca dados do dashboard |
+| `GET /api/sensors/{device}/readings` | Lê dados do sensor específico |
+| `POST /api/sensors/sync` | Sincroniza dados do Wokwi |
+
+## Estrutura de Dados (Firebase RTDB)
+
+```
+{
+  "sensors": {
+    "device_001": {
+      "readings": {
+        "timestamp_1": {
+          "voltage": 220.5,
+          "current": 5.2,
+          "power": 1146.6,
+          "timestamp": 1620000000
+        }
+      }
+    }
+  }
+}
 ```
 
-Roda automaticamente a cada 5 segundos via scheduler (`php artisan schedule:work`).
-
-Para rodar o scheduler em desenvolvimento:
-```bash
-cd backend
-php artisan schedule:work
-```
-
-## Funcionalidades
-
-- **Dashboard em Tempo Real** — KPIs de consumo (kWh) e custo (R$)
-- **Alertas Inteligentes** — Sobrecarga, desperdício noturno, consumo fora do horário, anomalias
-- **Gestão de Setores e Dispositivos** — CRUD completo com thresholds configuráveis
-- **Projeção Mensal** — Estimativa de consumo e custo para fim do mês
-- **Painel Financeiro** — Ranking de setores, custo diário, resumo mensal
-- **Metas** — Cadastro com acompanhamento de progresso percentual
-- **TV Mode / Transparência** — Interface visual com semáforo (verde/amarelo/vermelho)
-- **Manutenção de Dispositivos** — Registro de manutenções preventivas e corretivas
-
-## Credenciais de Demonstração
-
-Após rodar `php artisan migrate --seed`:
-
-| Campo | Valor |
-|-------|-------|
-| Email | `admin@lumenflow.com` |
-| Senha | `password` |
-
-## Deploy em Produção
-
-### Frontend (GitHub Pages)
-
-O frontend é 100% estático — basta servir os arquivos da raiz:
-
-1. Ative GitHub Pages no repositório (branch `main`, pasta `/`)
-2. Configure `src/config.js` com a URL da API de produção:
-   ```js
-   API_BASE_URL: 'https://sua-api.com/api'
-   ```
-3. O site estará disponível em `https://usuario.github.io/LumenFlow`
-
-### Backend (Servidor PHP)
-
-Qualquer servidor com PHP 8.3+ e MySQL:
-
-```bash
-cd backend
-composer install --optimize-autoloader --no-dev
-cp .env.example .env
-# Editar .env com credenciais de produção
-php artisan key:generate
-php artisan migrate --seed
-php artisan config:cache
-php artisan route:cache
-```
-
-Configure o cron do servidor para o scheduler:
-```
-* * * * * cd /path/to/backend && php artisan schedule:run >> /dev/null 2>&1
-```
-
-### Variáveis de Ambiente Importantes
+## Variáveis de Ambiente
 
 | Variável | Descrição |
 |----------|-----------|
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | `false` |
-| `DB_*` | Credenciais MySQL |
 | `FIREBASE_RTDB_URL` | URL do Firebase Realtime Database |
+| `FIREBASE_AUTH_*` | Credenciais Firebase Auth |
 | `FRONTEND_URL` | URL do frontend (para CORS) |
 
 ## Documentação
 
-- [docs/API.md](docs/API.md) — Documentação completa dos endpoints da API
-- [TASKS.md](TASKS.md) — Planejamento completo de desenvolvimento
-- [TASKS_LOG.md](TASKS_LOG.md) — Registro detalhado de cada task concluída
-- [REFACTORING_PLAN.md](REFACTORING_PLAN.md) — Plano de refatoração da stack
-- [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) — Schema do banco de dados
+- [PLAN.md](PLAN.md) — Planejamento atualizado de desenvolvimento
