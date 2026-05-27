@@ -12,8 +12,8 @@ O **LumenFlow** é um sistema de dashboard inteligente para gestão e monitorame
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   Wokwi ESP32   │────▶│ Firebase RTDB    │◀────│  Frontend SPA   │
-│  (simulação)    │     │  (dados IoT)     │     │  (GitHub Pages) │
+│  Wokwi Web IDE  │────▶│ Firebase RTDB    │◀────│  Frontend SPA   │
+│   (simulação)   │     │  (dados IoT)     │     │  (GitHub Pages) │
 └─────────────────┘     └──────────────────┘     └────────┬────────┘
                                                           │
                                                           │ REST API
@@ -27,11 +27,18 @@ O **LumenFlow** é um sistema de dashboard inteligente para gestão e monitorame
                                                  └─────────────────┘
 ```
 
+### Fluxo Completo de Dados
+
+1. **Wokwi Web IDE**: Simula ESP32 enviando dados de sensores para o Firebase
+2. **Firebase RTDB**: Armazena dados brutos da simulação em tempo real
+3. **Laravel API**: Processa dados e expõe via REST API
+4. **Frontend SPA**: Exibe dashboard atualizado em tempo real
+
 | Camada | Tecnologia | Localização |
 |--------|-----------|-------------|
 | Frontend | Vanilla JS (ES6 Modules) + Tailwind CSS + Alpine.js | `src/` + `index.html` |
 | Backend | Laravel 13 + PHP 8.3 | `backend/` |
-| IoT | ESP32 (C++) via Wokwi → Firebase RTDB | `wokwi/` |
+| IoT | ESP32 (C++) via Wokwi Web IDE → Firebase RTDB | `wokwi.com` |
 | Real-time | Firebase Realtime Database (2 instâncias) | Cloud |
 | Auth | Firebase Authentication | Cloud |
 
@@ -87,7 +94,9 @@ FIREBASE_AUTH_DOMAIN=seu-projeto.firebaseapp.com
 FIREBASE_API_KEY=sua-api-key
 FIREBASE_PROJECT_ID=seu-projeto-id
 
-FRONTEND_URL=http://localhost:5500
+# Configuração CORS
+FRONTEND_URL=https://seu-usuario.github.io
+WOKWI_URL=https://wokwi.com
 ```
 
 Depois inicie o servidor:
@@ -109,7 +118,9 @@ A API estará em `http://localhost:8000/api`.
 
 3. **Configure Firebase Auth**:
    - Método: Email/Password
-   - Domains permitidos: `http://localhost:5500`
+   - Domains permitidos: 
+     - `https://seu-usuario.github.io` (frontend)
+     - `https://wokwi.com` (simulação)
 
 ## Endpoints da API
 
@@ -148,7 +159,41 @@ A API estará em `http://localhost:8000/api`.
 | `APP_DEBUG` | `false` |
 | `FIREBASE_RTDB_URL` | URL do Firebase Realtime Database |
 | `FIREBASE_AUTH_*` | Credenciais Firebase Auth |
-| `FRONTEND_URL` | URL do frontend (para CORS) |
+| `FRONTEND_URL` | URL do frontend GitHub Pages |
+| `WOKWI_URL` | URL do Wokwi (para CORS) |
+
+## Configuração Wokwi
+
+Para simular o ESP32 no Wokwi:
+
+1. Acesse [Wokwi Web IDE](https://wokwi.com/)
+2. Crie um novo projeto com ESP32
+3. Configure o firmware para:
+   - Conectar ao Firebase RTDB
+   - Enviar dados de sensores a cada 5 segundos
+   - Estrutura de dados: `/sensors/{deviceId}/{timestamp}`
+
+Exemplo de código para Wokwi:
+```cpp
+// Inclua bibliotecas Firebase
+#include <WiFi.h>
+#include <FirebaseESP32.h>
+
+// Configurações Firebase
+#define FIREBASE_HOST "seu-projeto-iot.firebaseio.com"
+#define FIREBASE_AUTH "sua-auth-token"
+
+void setup() {
+  // Inicializar WiFi e Firebase
+  // Configurar sensores
+}
+
+void loop() {
+  // Ler sensores
+  // Enviar para Firebase
+  delay(5000);
+}
+```
 
 ## Documentação
 

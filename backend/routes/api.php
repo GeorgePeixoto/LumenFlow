@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\FirebaseSyncController;
 use App\Http\Controllers\Api\GoalController;
 use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\Api\TariffController;
+use App\Http\Controllers\Api\WokwiSyncController;
+use App\Http\Controllers\Api\SensorDataController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -90,4 +92,17 @@ Route::middleware('auth:sanctum')->group(function () {
     // Firebase Sync
     Route::post('/firebase/sync', [FirebaseSyncController::class, 'sync']);
     Route::get('/firebase/preview', [FirebaseSyncController::class, 'preview']);
+
+    // Novas rotas Firebase (substituem as antigas)
+    Route::get('/sensors/{device}/readings', [SensorDataController::class, 'getDeviceReadings']);
+    Route::get('/sensors/{device}/latest', [SensorDataController::class, 'getLatestReading']);
+    Route::get('/sensors/devices', [SensorDataController::class, 'getDevices']);
+    Route::get('/dashboard', [SensorDataController::class, 'getDashboard']);
+
+    // Rotas Wokwi (públicas, pois o Wokwi não autentica)
+    Route::prefix('wokwi')->group(function () {
+        Route::post('/sync', [WokwiSyncController::class, 'syncData']);
+        Route::get('/devices', [WokwiSyncController::class, 'getActiveDevices']);
+        Route::get('/devices/{device}/status', [WokwiSyncController::class, 'getDeviceStatus']);
+    });
 });
