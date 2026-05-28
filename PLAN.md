@@ -40,7 +40,6 @@ O LumenFlow é um sistema completo de monitoramento energético IoT para varejo,
 ### 3. API Laravel (Backend)
 - **Framework:** Laravel 11 com Lumen
 - **Autenticação:** Sanctum para APIs
-- **Banco de Dados:** SQLite para desenvolvimento
 - **Endpoints:** RESTful para dados IoT e usuários
 
 ### 4. Frontend (SPA)
@@ -195,8 +194,10 @@ const devices = [
 ### 🚀 Fase 5: Aprimoramentos (Planejado)
 - [ ] Implementar WebSocket para atualizações em tempo real
 - [ ] Adicionar gráficos históricos com Chart.js
-- [ ] Implementar sistema de alertas
-- [ ] Criar painel administrativo
+- [ ] Implementar sistema de alertas inteligentes
+- [ ] Otimizar performance do dashboard existente
+- [ ] Adicionar exportação de dados (PDF, CSV)
+- [ ] Implementar filtros avançados por período e equipamento
 
 ### 🚀 Fase 6: Escala (Planejado)
 - [ ] Migrar para Firebase Firestore

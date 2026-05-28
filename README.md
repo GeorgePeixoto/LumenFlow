@@ -318,6 +318,16 @@ curl "https://projeto-pi-bf5a6-default-rtdb.firebaseio.com/sensores.json?auth=AP
 - **[backend/README.md](backend/README.md)** - Documentação da API Laravel
 - **[src/README.md](src/README.md)** - Documentação do frontend
 
+## 🎯 Público-Alvo
+
+O LumenFlow foi projetado especificamente para:
+- 🔧 **Engenheiros de Manutenção** - Monitoramento de equipamentos
+- 💼 **Gestores de Operações** - Análise de consumo energético
+- 📊 **Administradores** - Tomada de decisão baseada em dados
+- 🏢 **Executivos** - Visão geral do consumo da empresa
+
+**Nota:** Este é um sistema administrativo por natureza - não é necessário criar um "painel administrativo" adicional, pois toda a interface já é voltada para usuários com altos níveis de acesso e responsabilidade.
+
 ## 🤝 Contribuição
 
 ### Como Contribuir

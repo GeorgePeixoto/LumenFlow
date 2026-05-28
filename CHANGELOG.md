@@ -61,7 +61,6 @@ e este projeto segue a [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 ### 🔧 Configuração Técnica
 - **Backend**
   - Laravel 11 + PHP 8.3
-  - SQLite para desenvolvimento
   - Guzzle para comunicação com Firebase
   - Sanctum para autenticação
 
@@ -110,6 +109,12 @@ e este projeto segue a [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - ✅ Endpoints públicos e privados
 - ✅ Monitoramento em tempo real
 - ✅ Deploy automatizado
+
+### 📝 Melhorias de Documentação
+- ✅ Atualizado PLAN.md para remover redundância de "painel administrativo"
+- ✅ Adicionado seção de "Público-Alvo" no README.md
+- ✅ Esclarecido que o sistema é intrinsecamente administrativo
+- ✅ Foco em funcionalidades úteis para gestores e engenheiros
 
 ### 📈 Métricas de Desempenho
 - **Latência API:** <100ms
