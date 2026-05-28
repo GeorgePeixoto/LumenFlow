@@ -5,9 +5,9 @@ Backend REST API do sistema LumenFlow — monitoramento inteligente de energia p
 ## Stack
 
 - **PHP 8.3** + **Laravel 13**
-- **MySQL 8.4** (persistência)
 - **Laravel Sanctum** (autenticação token-based)
 - **Firebase RTDB** (dados live do ESP32)
+- **Firebase Auth** (autenticação de usuários)
 
 ## Setup
 
@@ -16,8 +16,7 @@ composer install
 cp .env.example .env
 php artisan key:generate
 
-# Configurar .env (DB_DATABASE, DB_USERNAME, DB_PASSWORD, FIREBASE_RTDB_URL)
-php artisan migrate --seed
+# Configurar .env (FIREBASE_RTDB_URL, FIREBASE_AUTH_* credentials)
 php artisan serve
 ```
 
@@ -77,8 +76,7 @@ app/
 │   ├── ConsumptionController.php
 │   ├── FinancialController.php
 │   └── FirebaseSyncController.php
-├── Models/ (8 models)
-└── Services/FirebaseSyncService.php
+└── Services/FirebaseService.php
 ```
 
 ## Licença

@@ -14,8 +14,8 @@ class FirebaseRtdbService
 
     public function __construct()
     {
-        $this->rtdbUrl = config('firebase.rtdb_url');
-        $this->apiKey = config('firebase.auth.api_key');
+        $this->rtdbUrl = config('firebase.connections.wokwi.database_url');
+        $this->apiKey = config('firebase.connections.wokwi.api_key') ?: '';
 
         $this->client = new Client([
             'verify' => false, // Desativar verificação SSL para desenvolvimento

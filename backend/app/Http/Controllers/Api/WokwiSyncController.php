@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\FirebaseRtdbService;
+use App\Services\WokwiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class WokwiSyncController extends Controller
 {
-    protected $firebaseRtdbService;
+    protected $wokwiService;
 
-    public function __construct(FirebaseRtdbService $firebaseRtdbService)
+    public function __construct(WokwiService $wokwiService)
     {
-        $this->firebaseRtdbService = $firebaseRtdbService;
+        $this->wokwiService = $wokwiService;
     }
 
     /**
@@ -34,11 +34,8 @@ class WokwiSyncController extends Controller
             'readings.*.humidity' => 'nullable|numeric',
         ]);
 
-        // Salvar dados no Firebase RTDB
-        $path = "sensors/{$validated['device_id']}/readings";
-        $data = $validated['readings'];
-
-        $result = $this->firebaseRtdbService->setData($path, $data);
+        // Salvar dados no Firebase RTDB usando o WokwiService
+        $result = $this->wokwiService->saveSensorData($validated['device_id'], $data);
 
         if (!$result['success']) {
             return response()->json([
@@ -54,7 +51,8 @@ class WokwiSyncController extends Controller
             'success' => true,
             'message' => 'Dados sincronizados com sucesso',
             'device_id' => $validated['device_id'],
-            'readings_count' => count($data)
+            'readings_count' => count($data),
+            'reading_id' => $result['reading_id'] ?? null
         ]);
     }
 
@@ -64,30 +62,20 @@ class WokwiSyncController extends Controller
      */
     public function getActiveDevices(): JsonResponse
     {
-        $result = $this->firebaseRtdbService->getAllDevicesData();
+        $activeDevices = $this->wokwiService->getActiveDevices();
 
-        if (!$result['success']) {
-            return response()->json([
-                'success' => false,
-                'error' => $result['message']
-            ], 404);
-        }
-
-        $activeDevices = [];
-        foreach ($result['devices_status'] as $deviceId => $status) {
-            if ($status['active']) {
-                $activeDevices[] = [
-                    'device_id' => $deviceId,
-                    'last_reading' => $status['last_reading'],
-                    'readings_count' => $status['readings_count']
-                ];
-            }
+        $formattedDevices = [];
+        foreach ($activeDevices as $deviceId => $deviceData) {
+            $formattedDevices[] = [
+                'device_id' => $deviceId,
+                'data' => $deviceData
+            ];
         }
 
         return response()->json([
             'success' => true,
-            'active_devices' => $activeDevices,
-            'total_active' => count($activeDevices)
+            'active_devices' => $formattedDevices,
+            'total_active' => count($formattedDevices)
         ]);
     }
 
@@ -97,29 +85,18 @@ class WokwiSyncController extends Controller
      */
     public function getDeviceStatus(string $device): JsonResponse
     {
-        $result = $this->firebaseRtdbService->getSensorData($device);
-
-        if (!$result['success']) {
-            return response()->json([
-                'success' => false,
-                'error' => $result['message']
-            ], 404);
-        }
+        // Obter status do dispositivo
+        $status = $this->wokwiService->getLatestReadings($device, 1);
 
         // Verificar se o dispositivo está ativo (última leitura < 5 minutos)
         $isActive = false;
         $lastReading = null;
         $readingCount = 0;
 
-        if (!empty($result['data'])) {
-            krsort($result['data']);
-            $firstKey = key($result['data']);
-            if ($firstKey) {
-                $lastReading = $result['data'][$firstKey];
-                $lastReading['timestamp'] = $firstKey;
-                $readingCount = count($result['data']);
-                $isActive = (time() - $firstKey) < 300; // 5 minutos
-            }
+        if (!empty($status)) {
+            $lastReading = $status[0];
+            $readingCount = count($this->wokwiService->getLatestReadings($device, 100));
+            $isActive = (time() - $lastReading['timestamp']) < 300; // 5 minutos
         }
 
         return response()->json([

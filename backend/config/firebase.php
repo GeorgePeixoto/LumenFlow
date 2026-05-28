@@ -4,39 +4,64 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Firebase Realtime Database
+    | Firebase Configuration
     |--------------------------------------------------------------------------
     |
-    | Configuração para conexão com o Firebase RTDB.
-    | O Wokwi ESP32 envia dados de sensores para este banco.
+    | Here you may configure the multiple Firebase connections for your application.
     |
     */
 
-    'rtdb_url' => env('FIREBASE_RTDB_URL', 'https://seu-projeto-iot.firebaseio.com'),
+    'default' => env('FIREBASE_DEFAULT_CONNECTION', 'wokwi'),
 
-    'project_id' => env('FIREBASE_PROJECT_ID', 'seu-projeto-id'),
+    'connections' => [
+        'wokwi' => [
+            'database_url' => env('FIREBASE_WOKWI_DATABASE_URL'),
+            'client_email' => env('FIREBASE_WOKWI_CLIENT_EMAIL'),
+            'private_key' => env('FIREBASE_WOKWI_PRIVATE_KEY'),
+            'service_account_json' => env('FIREBASE_WOKWI_SERVICE_ACCOUNT_JSON'),
+            'storage_bucket' => env('FIREBASE_WOKWI_STORAGE_BUCKET', 'projeto-pi-bf5a6.appspot.com'),
+            'api_key' => env('FIREBASE_WOKWI_API_KEY'),
+        ],
 
-    /*
-    | Caminho para o arquivo de credenciais do service account (JSON).
-    | Necessário apenas se as regras do Firebase exigirem autenticação.
-    | Para regras abertas (.read: true, .write: true), pode ser null.
-    */
-    'credentials' => env('FIREBASE_CREDENTIALS', null),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Firebase Authentication
-    |--------------------------------------------------------------------------
-    |
-    | Configuração para Firebase Authentication.
-    | Usado para gerenciar usuários do sistema.
-    |
-    */
-
-    'auth' => [
-        'domain' => env('FIREBASE_AUTH_DOMAIN', 'seu-projeto.firebaseapp.com'),
-        'api_key' => env('FIREBASE_API_KEY', ''),
-        'project_id' => env('FIREBASE_PROJECT_ID', 'seu-projeto-id'),
+        'auth' => [
+            'database_url' => env('FIREBASE_AUTH_DATABASE_URL'),
+            'client_email' => env('FIREBASE_AUTH_CLIENT_EMAIL'),
+            'private_key' => env('FIREBASE_AUTH_PRIVATE_KEY'),
+            'service_account_json' => env('FIREBASE_AUTH_SERVICE_ACCOUNT_JSON'),
+            'storage_bucket' => env('FIREBASE_AUTH_STORAGE_BUCKET', 'pi-login-b7130.appspot.com'),
+            'api_key' => env('FIREBASE_AUTH_API_KEY'),
+        ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Firebase Realtime Database Settings
+    |--------------------------------------------------------------------------
+    |
+    | Default settings for Realtime Database connections.
+    |
+    */
+
+    'database' => [
+        'timeout' => env('FIREBASE_DATABASE_TIMEOUT', 10),
+        'keep_alive' => env('FIREBASE_KEEP_ALIVE', true),
+        'http_client' => [
+            'timeout' => env('FIREBASE_HTTP_TIMEOUT', 30),
+            'connect_timeout' => env('FIREBASE_CONNECT_TIMEOUT', 10),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Firebase Storage Settings
+    |--------------------------------------------------------------------------
+    |
+    | Default settings for Firebase Storage.
+    |
+    */
+
+    'storage' => [
+        'default_visibility' => env('FIREBASE_STORAGE_VISIBILITY', 'private'),
+        'max_size' => env('FIREBASE_MAX_FILE_SIZE', 1024 * 1024 * 10), // 10MB
+    ],
 ];

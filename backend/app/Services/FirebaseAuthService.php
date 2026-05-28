@@ -16,12 +16,16 @@ class FirebaseAuthService
 
     public function __construct()
     {
-        $this->authDomain = config('firebase.auth.domain');
-        $this->apiKey = config('firebase.auth.api_key');
-        $this->projectId = config('firebase.auth.project_id');
+        $this->authDomain = config('firebase.connections.auth.domain');
+        $this->apiKey = config('firebase.connections.auth.api_key');
+        $this->projectId = config('firebase.connections.auth.storage_bucket') ?
+            explode('.', config('firebase.connections.auth.storage_bucket'))[0] :
+            config('firebase.connections.auth.project_id');
 
         $factory = (new Factory)
-            ->withServiceAccount(config('firebase.credentials'))
+            ->withServiceAccount(app(FirebaseService::class, ['connection' => 'auth'])->getServiceAccount(
+                config('firebase.connections.auth')
+            ))
             ->withProjectId($this->projectId);
 
         $this->auth = $factory->createAuth();
