@@ -142,6 +142,10 @@ async function request(method, endpoint, {
   const url = appendQuery(normalizeEndpoint(endpoint), query);
   const requestHeaders = new Headers(headers);
 
+  if (!requestHeaders.has('Accept')) {
+    requestHeaders.set('Accept', JSON_CONTENT_TYPE);
+  }
+
   if (body !== undefined && !requestHeaders.has('Content-Type')) {
     requestHeaders.set('Content-Type', JSON_CONTENT_TYPE);
   }

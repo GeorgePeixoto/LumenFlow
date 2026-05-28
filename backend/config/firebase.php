@@ -30,6 +30,7 @@ return [
             'service_account_json' => env('FIREBASE_AUTH_SERVICE_ACCOUNT_JSON'),
             'storage_bucket' => env('FIREBASE_AUTH_STORAGE_BUCKET', 'pi-login-b7130.appspot.com'),
             'api_key' => env('FIREBASE_AUTH_API_KEY'),
+            'domain' => env('FIREBASE_AUTH_DOMAIN', 'pi-login-b7130.firebaseapp.com'),
         ],
     ],
 
@@ -49,6 +50,11 @@ return [
             'timeout' => env('FIREBASE_HTTP_TIMEOUT', 30),
             'connect_timeout' => env('FIREBASE_CONNECT_TIMEOUT', 10),
         ],
+    ],
+
+    'http' => [
+        'verify' => env('FIREBASE_HTTP_VERIFY', true),
+        'ca_bundle' => env('FIREBASE_HTTP_CA_BUNDLE'),
     ],
 
     /*

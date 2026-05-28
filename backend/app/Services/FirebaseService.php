@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
-use Kreait\Firebase\Factory;
-use Kreait\Firebase\ServiceAccount;
 use Kreait\Firebase\Database;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Http\HttpClientOptions;
+use Kreait\Firebase\ServiceAccount;
 use Illuminate\Support\Facades\Config;
 
 class FirebaseService
@@ -26,7 +27,26 @@ class FirebaseService
             throw new \Exception("Firebase connection '{$this->connection}' not configured.");
         }
 
-        $factory = (new Factory())->withServiceAccount($this->getServiceAccount($config));
+        $httpOptions = [
+            'timeout' => config('firebase.database.http_client.timeout', 30),
+            'connect_timeout' => config('firebase.database.http_client.connect_timeout', 10),
+        ];
+        $verifySetting = config('firebase.http.verify', true);
+        $caBundle = config('firebase.http.ca_bundle');
+
+        $verifyBool = filter_var($verifySetting, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if ($verifyBool === false) {
+            $httpOptions['verify'] = false;
+        } elseif (!empty($caBundle)) {
+            $httpOptions['verify'] = $caBundle;
+        }
+
+        $clientOptions = HttpClientOptions::default()
+            ->withGuzzleConfigOptions($httpOptions);
+
+        $factory = (new Factory())
+            ->withHttpClientOptions($clientOptions)
+            ->withServiceAccount($this->getServiceAccount($config));
 
         if (!empty($config['database_url'])) {
             $factory->withDatabaseUri($config['database_url']);
@@ -35,21 +55,28 @@ class FirebaseService
         return $factory;
     }
 
-    protected function getServiceAccount(array $config): ServiceAccount
+    public function getServiceAccount(array $config): array
     {
         if (!empty($config['service_account_json'])) {
-            return ServiceAccount::fromJson($config['service_account_json']);
+            return json_decode($config['service_account_json'], true);
         }
 
         if (!empty($config['client_email']) && !empty($config['private_key'])) {
-            return ServiceAccount::fromArray([
-                'client_email' => $config['client_email'],
-                'private_key' => $config['private_key'],
+            return [
+                'type' => 'service_account',
                 'project_id' => $config['storage_bucket'] ? explode('.', $config['storage_bucket'])[0] : null,
-            ]);
+                'private_key_id' => null,
+                'private_key' => $config['private_key'],
+                'client_email' => $config['client_email'],
+                'client_id' => null,
+                'auth_uri' => null,
+                'token_uri' => null,
+                'auth_provider_x509_cert_url' => null,
+                'client_x509_cert_url' => null,
+            ];
         }
 
-        throw new \Exception('Service account configuration is missing.');
+        throw new \Exception("Service account configuration not found.");
     }
 
     public function getDatabase(): Database

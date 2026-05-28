@@ -1,12 +1,12 @@
-﻿/**
+/**
  * LumenFlow — Transparency Page (Alpine.js + Tailwind)
  *
  * TV Mode / Painel de transparência com semáforo por setor.
- * Auto-refresh a cada 15s. Fullscreen toggle.
+ * Auto-refresh a cada 10s. Fullscreen toggle.
+ * Dados vêm do Firebase via /api/dashboard/public.
  */
 
-import { sectorService } from '../services/sectorService.js';
-import { httpClient } from '../services/httpClient.js';
+import { dashboardService } from '../services/dashboardService.js';
 
 export function registerTransparencyPage(Alpine) {
   Alpine.data('transparencyPage', () => ({
@@ -19,7 +19,7 @@ export function registerTransparencyPage(Alpine) {
 
     async init() {
       await this.load();
-      this._interval = setInterval(() => this.load(), 15000);
+      this._interval = setInterval(() => this.load(), 10000);
     },
 
     destroy() {
@@ -28,21 +28,21 @@ export function registerTransparencyPage(Alpine) {
 
     async load() {
       try {
-        const res = await httpClient.get('/api/consumption/by-sector');
-        const data = res?.data || res || [];
-        const sRes = await sectorService.list({ active: true });
-        const sectorList = sRes?.sectors || sRes?.data || [];
+        const data = await dashboardService.getPublicData();
+        const readings = data?.latest_readings || {};
 
-        this.sectors = sectorList.map(s => {
-          const consumption = data.find(d => d.sector_id === s.id || d.name === s.name);
-          const kwh = consumption?.total_kwh || consumption?.consumption_kwh || 0;
+        this.sectors = Object.entries(readings).map(([deviceId, reading]) => {
+          const kwh = reading.energia_kwh || 0;
+          const potencia = reading.potencia || 0;
           return {
-            id: s.id,
-            name: s.name,
+            id: deviceId,
+            name: reading.nome || deviceId,
             consumption: kwh,
-            status: this._getStatus(kwh, s),
+            potencia: potencia,
+            status: this._getStatus(kwh),
           };
         });
+
         this.lastUpdate = new Date();
         this.error = null;
       } catch (err) {
@@ -52,9 +52,10 @@ export function registerTransparencyPage(Alpine) {
       }
     },
 
-    _getStatus(consumption, sector) {
-      if (sector.threshold_red != null && consumption >= sector.threshold_red) return 'critical';
-      if (sector.threshold_yellow != null && consumption >= sector.threshold_yellow) return 'warning';
+    _getStatus(consumption) {
+      // Thresholds baseados em kWh
+      if (consumption >= 10) return 'critical';
+      if (consumption >= 5) return 'warning';
       return 'normal';
     },
 
@@ -65,6 +66,11 @@ export function registerTransparencyPage(Alpine) {
         critical: { label: 'Crítico', bg: 'bg-red-500', border: 'border-red-400', text: 'text-red-700 dark:text-red-400', icon: 'danger' },
       };
       return map[status] || map.normal;
+    },
+
+    formatPower(w) {
+      if (w == null) return '—';
+      return w >= 1000 ? (w / 1000).toFixed(1) + ' W' : w.toFixed(1) + ' W';
     },
 
     formatTime() {
@@ -93,7 +99,7 @@ export function renderTransparencyPageAlpine(container) {
   }
 
   container.innerHTML = `
-<div x-data="transparencyPage" x-init="init()" @beforeunload.window="destroy()" class="space-y-6">
+<div x-data="transparencyPage" @beforeunload.window="destroy()" class="space-y-6">
 
   <!-- Header -->
   <div class="flex items-center justify-between">
@@ -113,9 +119,9 @@ export function renderTransparencyPageAlpine(container) {
   <div x-show="error && !loading" x-cloak class="text-center py-16"><p class="text-gray-600 dark:text-gray-400" x-text="error"></p><button @click="load()" class="mt-3 text-emerald-600 font-medium">Tentar novamente</button></div>
 
   <div x-show="!loading && !error" x-cloak>
-    <div x-show="sectors.length === 0" class="text-center py-16 text-gray-500 dark:text-gray-400">Nenhum setor cadastrado.</div>
+    <div x-show="sectors.length === 0" class="text-center py-16 text-gray-500 dark:text-gray-400">Nenhum setor encontrado.</div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       <template x-for="sector in sectors" :key="sector.id">
         <div class="rounded-xl border-2 p-6 text-center transition-all" :class="statusConfig(sector.status).border + ' bg-white dark:bg-gray-800'">
           <!-- Status Icon -->
@@ -132,7 +138,8 @@ export function renderTransparencyPageAlpine(container) {
           </div>
 
           <h3 class="font-semibold text-gray-900 dark:text-white text-lg" x-text="sector.name"></h3>
-          <p class="text-2xl font-bold mt-2" :class="statusConfig(sector.status).text" x-text="sector.consumption.toFixed(1) + ' kWh'"></p>
+          <p class="text-2xl font-bold mt-2" :class="statusConfig(sector.status).text" x-text="sector.consumption.toFixed(2) + ' W'"></p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" x-text="formatPower(sector.potencia)"></p>
           <p class="text-sm mt-1 font-medium" :class="statusConfig(sector.status).text" x-text="statusConfig(sector.status).label"></p>
         </div>
       </template>

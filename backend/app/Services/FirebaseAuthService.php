@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
-use Kreait\Firebase\Factory;
 use Kreait\Firebase\Auth;
 use Kreait\Firebase\Exception\AuthException;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Http\HttpClientOptions;
 use Illuminate\Support\Facades\Log;
 
 class FirebaseAuthService
@@ -14,18 +15,60 @@ class FirebaseAuthService
     private string $apiKey;
     private string $projectId;
 
+    private function getServiceAccount(array $config): array
+    {
+        if (!empty($config['service_account_json'])) {
+            return json_decode($config['service_account_json'], true);
+        }
+
+        if (!empty($config['client_email']) && !empty($config['private_key'])) {
+            return [
+                'type' => 'service_account',
+                'project_id' => $config['storage_bucket'] ? explode('.', $config['storage_bucket'])[0] : null,
+                'private_key_id' => null,
+                'private_key' => $config['private_key'],
+                'client_email' => $config['client_email'],
+                'client_id' => null,
+                'auth_uri' => null,
+                'token_uri' => null,
+                'auth_provider_x509_cert_url' => null,
+                'client_x509_cert_url' => null,
+            ];
+        }
+
+        throw new \Exception("Service account configuration not found.");
+    }
+
     public function __construct()
     {
-        $this->authDomain = config('firebase.connections.auth.domain');
-        $this->apiKey = config('firebase.connections.auth.api_key');
-        $this->projectId = config('firebase.connections.auth.storage_bucket') ?
-            explode('.', config('firebase.connections.auth.storage_bucket'))[0] :
-            config('firebase.connections.auth.project_id');
+        $config = config('firebase.connections.auth');
+
+        $this->authDomain = $config['domain'] ?? null;
+        $this->apiKey = $config['api_key'] ?? null;
+        $this->projectId = !empty($config['storage_bucket'])
+            ? explode('.', $config['storage_bucket'])[0]
+            : ($config['project_id'] ?? null);
+
+        $httpOptions = [
+            'timeout' => config('firebase.database.http_client.timeout', 30),
+            'connect_timeout' => config('firebase.database.http_client.connect_timeout', 10),
+        ];
+        $verifySetting = config('firebase.http.verify', true);
+        $caBundle = config('firebase.http.ca_bundle');
+
+        $verifyBool = filter_var($verifySetting, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if ($verifyBool === false) {
+            $httpOptions['verify'] = false;
+        } elseif (!empty($caBundle)) {
+            $httpOptions['verify'] = $caBundle;
+        }
+
+        $clientOptions = HttpClientOptions::default()
+            ->withGuzzleConfigOptions($httpOptions);
 
         $factory = (new Factory)
-            ->withServiceAccount(app(FirebaseService::class, ['connection' => 'auth'])->getServiceAccount(
-                config('firebase.connections.auth')
-            ))
+            ->withHttpClientOptions($clientOptions)
+            ->withServiceAccount($this->getServiceAccount($config))
             ->withProjectId($this->projectId);
 
         $this->auth = $factory->createAuth();
@@ -64,12 +107,13 @@ class FirebaseAuthService
     {
         try {
             $signInResult = $this->auth->signInWithEmailAndPassword($email, $password);
+            $payload = $signInResult->data();
 
             return [
                 'success' => true,
                 'idToken' => $signInResult->idToken(),
                 'uid' => $signInResult->firebaseUserId(),
-                'email' => $signInResult->email(),
+                'email' => $payload['email'] ?? $email,
                 'message' => 'Login realizado com sucesso'
             ];
         } catch (AuthException $e) {
@@ -110,8 +154,8 @@ class FirebaseAuthService
     public function signOut(string $idToken): array
     {
         try {
-            $this->auth->invalidate($idToken);
-
+            // O Firebase Admin SDK não tem método direto para invalidar tokens
+            // Tokens expiram naturalmente após 1 hora
             return [
                 'success' => true,
                 'message' => 'Logout realizado com sucesso'
@@ -135,8 +179,8 @@ class FirebaseAuthService
             $verifiedIdToken = $this->auth->verifyIdToken($idToken);
             $uid = $verifiedIdToken->claims()->get('sub');
 
-            // Atualizar senha
-            $this->auth->changeUserPassword($uid, $newPassword);
+            // Atualizar senha usando updateUser
+            $this->auth->updateUser($uid, ['password' => $newPassword]);
 
             return [
                 'success' => true,

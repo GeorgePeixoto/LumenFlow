@@ -23,7 +23,13 @@ export const authService = {
   },
 
   async register(payload) {
-    return httpClient.post('/auth/register', payload);
+    const response = await httpClient.post('/auth/register', payload);
+
+    if (response?.token) {
+      httpClient.setAuthToken(response.token, { remember: false });
+    }
+
+    return response;
   },
 
   async forgotPassword({ email } = {}) {

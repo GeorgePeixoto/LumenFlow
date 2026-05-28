@@ -12,10 +12,52 @@ use Illuminate\Http\Request;
 
 class DeviceController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, \App\Services\FirebaseRtdbService $firebaseService): JsonResponse
     {
-        $devices = Device::whereHas('sector', function ($q) use ($request) {
-            $q->where('user_id', $request->user()->id);
+        $user = $request->user();
+
+        // 1. Sync from Firebase
+        $result = $firebaseService->getAllDevicesData();
+        if ($result['success'] && isset($result['data']['latest_readings'])) {
+            $firebaseDevices = $result['data']['latest_readings'];
+            $devicesStatus = $result['data']['devices_status'] ?? [];
+
+            // Obter ou criar o primeiro setor do usuário
+            $defaultSector = \App\Models\Sector::where('user_id', $user->id)->first();
+            if (!$defaultSector) {
+                $defaultSector = \App\Models\Sector::create([
+                    'user_id' => $user->id,
+                    'name' => 'Setor Principal',
+                    'description' => 'Setor criado automaticamente para novos dispositivos.',
+                    'active' => true,
+                ]);
+            }
+
+            foreach ($firebaseDevices as $deviceId => $reading) {
+                $status = !empty($devicesStatus[$deviceId]['active']) ? 'online' : 'offline';
+                
+                $device = Device::where('firebase_id', $deviceId)->first();
+                if (!$device) {
+                    Device::create([
+                        'firebase_id' => $deviceId,
+                        'name' => $reading['nome'] ?? $deviceId,
+                        'power_watts' => $reading['potencia'] ?? null,
+                        'status' => $status,
+                        'sector_id' => $defaultSector->id,
+                        'type' => 'sensor',
+                    ]);
+                } else {
+                    $device->update([
+                        'power_watts' => $reading['potencia'] ?? $device->power_watts,
+                        'status' => $status,
+                    ]);
+                }
+            }
+        }
+
+        // 2. Fetch user's devices
+        $devices = Device::whereHas('sector', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
         })
             ->with('sector:id,name')
             ->orderBy('name')

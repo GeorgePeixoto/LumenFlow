@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { path: '/transparency', label: 'Transparência', icon: 'transparency' },
   { path: '/devices',      label: 'Dispositivos',  icon: 'devices' },
   { path: '/alerts',       label: 'Alertas',       icon: 'alerts' },
-  { path: '/goals',        label: 'Metas',         icon: 'goals' },
+  { path: '/goals',        label: 'Metas',         icon: 'goals',     hidden: true },
   { path: '/financial',    label: 'Financeiro',    icon: 'financial' },
   { path: '/reports',      label: 'Relatórios',    icon: 'reports' },
   { path: '/settings',     label: 'Configurações', icon: 'settings' },
@@ -67,7 +67,7 @@ export const AppShell = (() => {
     }));
     _shell.className = 'flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900';
 
-    const navItemsHtml = NAV_ITEMS.map(item => `
+    const navItemsHtml = NAV_ITEMS.filter(item => !item.hidden).map(item => `
       <a href="#${item.path}"
          @click="if(window.innerWidth < 768) sidebarOpen = false"
          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${_activePath === item.path ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'}"

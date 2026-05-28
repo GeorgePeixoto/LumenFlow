@@ -6,6 +6,7 @@
  */
 
 import { authService } from '../services/authService.js';
+import { sessionService } from '../services/sessionService.js';
 import Router from '../utils/router.js';
 
 const SEGMENT_OPTIONS = [
@@ -156,9 +157,14 @@ export function registerRegisterPage(Alpine) {
       };
 
       try {
-        await authService.register(payload);
-        Alpine.store('toast')?.show('Cadastro realizado. Faça login para continuar.', 'success', 7000);
-        Router.navigate('/login');
+        const response = await authService.register(payload);
+
+        if (response?.user) {
+          sessionService.setUser(response.user);
+        }
+
+        Alpine.store('toast')?.show('Cadastro realizado com sucesso.', 'success', 7000);
+        Router.navigate('/sectors/select');
       } catch (err) {
         this.loading = false;
         this._handleError(err);

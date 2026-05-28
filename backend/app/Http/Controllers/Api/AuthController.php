@@ -26,6 +26,7 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $validated = $request->validated();
+        $displayName = $validated['responsible_name'] ?? $validated['name'] ?? null;
 
         // Criar usuário no Firebase Auth
         $firebaseResult = $this->firebaseAuthService->createUser(
@@ -39,23 +40,36 @@ class AuthController extends Controller
             ]);
         }
 
-        // Armazenar informações adicionais no banco de dados local (opcional)
-        // $user = User::create([
-        //     'firebase_uid' => $firebaseResult['uid'],
-        //     'name' => $validated['name'],
-        //     'email' => $validated['email'],
-        //     'company_name' => $validated['company_name'] ?? null,
-        //     'cnpj' => $validated['cnpj'] ?? null,
-        //     'segment' => $validated['segment'] ?? null,
-        // ]);
+        $authResult = $this->firebaseAuthService->authenticateUser(
+            $validated['email'],
+            $validated['password']
+        );
+
+        if (!$authResult['success']) {
+            throw ValidationException::withMessages([
+                'email' => [$authResult['error']],
+            ]);
+        }
+
+        // Armazenar informações adicionais no banco de dados local
+        $user = \App\Models\User::create([
+            'name' => $displayName,
+            'email' => $validated['email'],
+            'password' => bcrypt($validated['password']),
+            'company_name' => $validated['company_name'] ?? null,
+            'cnpj' => $validated['cnpj'] ?? null,
+            'segment' => $validated['segment'] ?? null,
+        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Usuário registrado com sucesso',
+            'token' => $authResult['idToken'],
             'user' => [
                 'uid' => $firebaseResult['uid'],
                 'email' => $firebaseResult['email'],
-                'name' => $validated['name']
+                'name' => $displayName,
+                'company_name' => $validated['company_name'] ?? null,
             ]
         ], 201);
     }

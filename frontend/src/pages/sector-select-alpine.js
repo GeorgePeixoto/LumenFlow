@@ -1,12 +1,16 @@
-﻿/**
+/**
  * LumenFlow — Sector Select Page (Alpine.js + Tailwind)
  *
  * Página pós-login para selecionar o setor ativo.
+ * Setores vêm dinamicamente do Firebase (via /api/dashboard/public).
+ * O setor selecionado é salvo no localStorage para uso no dashboard.
  */
 
-import { sectorService } from '../services/sectorService.js';
+import { dashboardService } from '../services/dashboardService.js';
 import { sessionService } from '../services/sessionService.js';
 import Router from '../utils/router.js';
+
+export const SELECTED_SECTOR_KEY = 'lf_selected_sector';
 
 export function registerSectorSelectPage(Alpine) {
   Alpine.data('sectorSelectPage', () => ({
@@ -26,8 +30,7 @@ export function registerSectorSelectPage(Alpine) {
       this.loading = true;
       this.error = false;
       try {
-        const response = await sectorService.list({ active: true });
-        this.sectors = response?.sectors || response?.data || [];
+        this.sectors = await dashboardService.getFirebaseSectors();
       } catch (_) {
         this.error = true;
       } finally {
@@ -36,11 +39,26 @@ export function registerSectorSelectPage(Alpine) {
     },
 
     selectSector(sector) {
+      // Persiste o setor selecionado para o dashboard ler
+      try {
+        localStorage.setItem(SELECTED_SECTOR_KEY, JSON.stringify({
+          id: sector.id,
+          name: sector.name,
+          potencia: sector.potencia,
+          energia_kwh: sector.energia_kwh,
+        }));
+      } catch (_) {}
       Router.navigate('/dashboard');
     },
 
-    goToSectors() {
-      Router.navigate('/sectors');
+    formatPower(w) {
+      if (w == null) return '—';
+      return w >= 1000 ? (w / 1000).toFixed(1) + ' kW' : w.toFixed(1) + ' W';
+    },
+
+    formatEnergy(kwh) {
+      if (kwh == null) return '—';
+      return kwh.toFixed(2) + ' kWh';
     },
   }));
 }
@@ -80,19 +98,27 @@ export function renderSectorSelectPageAlpine(container) {
   <!-- Empty -->
   <div x-show="!loading && !error && sectors.length === 0" x-cloak class="text-center py-12">
     <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-    <p class="text-gray-600 dark:text-gray-400 mb-4">Nenhum setor cadastrado.</p>
-    <button @click="goToSectors()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors">Gerenciar setores</button>
+    <p class="text-gray-600 dark:text-gray-400 mb-4">Nenhum setor encontrado no Firebase.</p>
   </div>
 
   <!-- Sector Grid -->
-  <div x-show="!loading && !error && sectors.length > 0" x-cloak class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-3xl">
+  <div x-show="!loading && !error && sectors.length > 0" x-cloak class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-3xl">
     <template x-for="sector in sectors" :key="sector.id">
       <button
         @click="selectSector(sector)"
         class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-md transition-all text-left group"
       >
-        <p class="font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" x-text="sector.name"></p>
-        <p x-show="sector.description" x-text="sector.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+        <p class="font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors text-lg" x-text="sector.name"></p>
+        <div class="flex items-center gap-4 mt-3">
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <span class="text-sm text-gray-600 dark:text-gray-400" x-text="formatPower(sector.potencia)"></span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
+            <span class="text-sm text-gray-600 dark:text-gray-400" x-text="formatEnergy(sector.energia_kwh)"></span>
+          </div>
+        </div>
       </button>
     </template>
   </div>
