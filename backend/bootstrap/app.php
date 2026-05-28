@@ -12,7 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // API routes are stateless; avoid CSRF requirements for JSON requests.
+        $middleware->alias([
+            'firebase' => \App\Http\Middleware\FirebaseAuth::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

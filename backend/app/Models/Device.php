@@ -18,6 +18,7 @@ class Device extends Model
         'power_watts',
         'active',
         'status',
+        'firebase_id',
     ];
 
     protected function casts(): array

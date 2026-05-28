@@ -11,7 +11,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(FirebaseService::class, function () {
+            return new FirebaseService();
+        });
+
+        $this->app->bind(WokwiService::class, function () {
+            return new WokwiService(app(FirebaseService::class));
+        });
+
+        $this->app->bind(FirebaseAuthService::class, function () {
+            return new FirebaseAuthService();
+        });
     }
 
     /**

@@ -11,7 +11,7 @@ class FirebaseSyncService
 
     public function __construct()
     {
-        $this->rtdbUrl = rtrim(config('firebase.rtdb_url'), '/');
+        $this->rtdbUrl = rtrim(config('firebase.connections.wokwi.database_url'), '/');
     }
 
     /**

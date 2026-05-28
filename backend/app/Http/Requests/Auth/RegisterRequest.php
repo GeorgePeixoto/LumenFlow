@@ -15,8 +15,9 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'name' => ['required_without:responsible_name', 'string', 'max:255'],
+            'responsible_name' => ['required_without:name', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'password' => ['required', 'confirmed', Password::min(8)],
             'company_name' => ['nullable', 'string', 'max:255'],
             'cnpj' => ['nullable', 'string', 'max:18'],
@@ -27,7 +28,8 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'O nome é obrigatório.',
+            'name.required_without' => 'O nome é obrigatório.',
+            'responsible_name.required_without' => 'O nome do responsável é obrigatório.',
             'email.required' => 'O e-mail é obrigatório.',
             'email.email' => 'Informe um e-mail válido.',
             'email.unique' => 'Este e-mail já está cadastrado.',

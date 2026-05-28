@@ -11,37 +11,49 @@ use App\Http\Controllers\Api\FirebaseSyncController;
 use App\Http\Controllers\Api\GoalController;
 use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\Api\TariffController;
+use App\Http\Controllers\Api\WokwiSyncController;
+use App\Http\Controllers\Api\SensorDataController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Auth Routes (públicas + protegidas)
+| Public Routes (sem autenticação)
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/me', [AuthController::class, 'me']);
-    });
 });
 
 /*
 |--------------------------------------------------------------------------
-| Protected Routes (auth:sanctum)
+| Protected Routes (firebase)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('firebase')->group(function () {
+    // Auth
+    Route::prefix('auth')->group(function () {
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'me']);
+    });
+
+    // Sensor, Wokwi, Dashboard
+    Route::get('/sensors/{device}/readings', [SensorDataController::class, 'getDeviceReadings']);
+    Route::get('/sensors/{device}/latest', [SensorDataController::class, 'getLatestReading']);
+    Route::get('/sensors/devices', [SensorDataController::class, 'getDevices']);
+    Route::get('/dashboard/public', [SensorDataController::class, 'getDashboard']);
+    Route::post('/wokwi/sync', [WokwiSyncController::class, 'syncData']);
+    Route::get('/wokwi/devices', [WokwiSyncController::class, 'getActiveDevices']);
+    Route::get('/wokwi/devices/{device}/status', [WokwiSyncController::class, 'getDeviceStatus']);
 
     // Dashboard
     Route::get('/dashboard/kpis', [DashboardController::class, 'kpis']);
     Route::get('/dashboard/consumption', [DashboardController::class, 'consumption']);
     Route::get('/dashboard/top-sectors', [DashboardController::class, 'topSectors']);
     Route::get('/dashboard/projection', [DashboardController::class, 'projection']);
+    Route::get('/dashboard', [SensorDataController::class, 'getAuthenticatedDashboard']);
 
     // Setores
     Route::apiResource('sectors', SectorController::class);

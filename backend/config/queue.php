@@ -35,15 +35,6 @@ return [
             'driver' => 'sync',
         ],
 
-        'database' => [
-            'driver' => 'database',
-            'connection' => env('DB_QUEUE_CONNECTION'),
-            'table' => env('DB_QUEUE_TABLE', 'jobs'),
-            'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
-            'after_commit' => false,
-        ],
-
         'beanstalkd' => [
             'driver' => 'beanstalkd',
             'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),
@@ -84,7 +75,6 @@ return [
         'failover' => [
             'driver' => 'failover',
             'connections' => [
-                'database',
                 'deferred',
             ],
         ],
@@ -103,7 +93,6 @@ return [
     */
 
     'batching' => [
-        'database' => env('DB_CONNECTION', 'sqlite'),
         'table' => 'job_batches',
     ],
 
@@ -121,8 +110,7 @@ return [
     */
 
     'failed' => [
-        'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        'driver' => env('QUEUE_FAILED_DRIVER', 'file'),
         'table' => 'failed_jobs',
     ],
 
