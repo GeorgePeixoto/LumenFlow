@@ -1,10 +1,11 @@
-﻿/**
+/**
  * LumenFlow — Alerts Page (Alpine.js + Tailwind)
  *
  * Central de alertas com filtros, ações (acknowledge/resolve).
  */
 
 import { alertService } from '../services/alertService.js';
+import { sessionService } from '../services/sessionService.js';
 import Router from '../utils/router.js';
 
 export function registerAlertsPage(Alpine) {
@@ -16,17 +17,37 @@ export function registerAlertsPage(Alpine) {
     filterSeverity: '',
     filterStatus: 'open',
 
+    pollInterval: null,
+
     async init() {
       const hash = window.location.hash;
       if (hash.includes('type=')) {
         const match = hash.match(/type=([^&]+)/);
         if (match) this.filterType = match[1];
       }
-      await this.load();
+      await this.load(true);
+
+      // Inicia polling de 10 segundos
+      this.pollInterval = setInterval(async () => {
+        // Se o componente não estiver mais no DOM, limpa o intervalo
+        if (!document.querySelector('[x-data="alertsPage"]')) {
+          clearInterval(this.pollInterval);
+          return;
+        }
+        await this.load(false);
+      }, 10000);
     },
 
-    async load() {
-      this.loading = true;
+    destroy() {
+      if (this.pollInterval) {
+        clearInterval(this.pollInterval);
+      }
+    },
+
+    async load(showLoading = true) {
+      if (showLoading) {
+        this.loading = true;
+      }
       this.error = null;
       try {
         const params = { sort: '-created_at', limit: 50 };
@@ -35,14 +56,67 @@ export function registerAlertsPage(Alpine) {
         if (this.filterStatus) params.status = this.filterStatus;
         const res = await alertService.list(params);
         this.alerts = res?.data || res?.alerts || res || [];
+
+        await this.checkNewNotifications();
       } catch (err) {
-        this.error = err?.message || 'Erro ao carregar alertas.';
+        if (showLoading) {
+          this.error = err?.message || 'Erro ao carregar alertas.';
+        } else {
+          console.error('Erro ao atualizar alertas em background:', err);
+        }
       } finally {
-        this.loading = false;
+        if (showLoading) {
+          this.loading = false;
+        }
       }
     },
 
-    onFilterChange() { this.load(); },
+    async checkNewNotifications() {
+      try {
+        const user = sessionService.getUser();
+        const userId = user?.id || 'guest';
+        const storageKey = `lf_notified_alerts_${userId}`;
+
+        // Busca os últimos 50 alertas para o usuário autenticado de forma irrestrita
+        const res = await alertService.list({ sort: '-created_at', limit: 50 });
+        const allAlerts = res?.data || res?.alerts || res || [];
+
+        let notifiedIds = JSON.parse(localStorage.getItem(storageKey) || 'null');
+
+        // Primeira carga da central de alertas: inicializa com os IDs atuais para evitar spam do passado
+        if (notifiedIds === null) {
+          notifiedIds = allAlerts.map(a => a.id);
+          localStorage.setItem(storageKey, JSON.stringify(notifiedIds));
+          return;
+        }
+
+        let updated = false;
+        for (const alert of allAlerts) {
+          // Envia notificação apenas para alertas em aberto ('open') que ainda não foram notificados
+          if (alert.status === 'open' && !notifiedIds.includes(alert.id)) {
+            try {
+              await alertService.notify(alert.id);
+              notifiedIds.push(alert.id);
+              updated = true;
+            } catch (err) {
+              console.error('Erro ao disparar e-mail de alerta:', alert.id, err);
+            }
+          } else if (!notifiedIds.includes(alert.id)) {
+            // Registra IDs já vistos mesmo que não estejam mais abertos
+            notifiedIds.push(alert.id);
+            updated = true;
+          }
+        }
+
+        if (updated) {
+          localStorage.setItem(storageKey, JSON.stringify(notifiedIds));
+        }
+      } catch (err) {
+        console.error('Erro no fluxo de notificação de e-mails:', err);
+      }
+    },
+
+    onFilterChange() { this.load(true); },
 
     severityBadge(severity) {
       const map = {
@@ -64,7 +138,7 @@ export function registerAlertsPage(Alpine) {
     },
 
     typeLabel(type) {
-      const map = { overload: 'Sobrecarga', off_hours: 'Fora de horário', night_waste: 'Noturno', anomaly: 'Anomalia', goal: 'Meta' };
+      const map = { overload: 'Sobrecarga', off_hours: 'Fora de horário', night_waste: 'Noturno', anomaly: 'Anomalia', goal: 'Meta', above_average: 'Acima da média' };
       return map[type] || type;
     },
 
@@ -124,6 +198,7 @@ export function renderAlertsPageAlpine(container) {
       <option value="off_hours">Fora de horário</option>
       <option value="night_waste">Noturno</option>
       <option value="anomaly">Anomalia</option>
+      <option value="above_average">Acima da média</option>
     </select>
     <select x-model="filterSeverity" @change="onFilterChange()" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
       <option value="">Todas severidades</option>

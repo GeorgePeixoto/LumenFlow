@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\DeviceController;
 use App\Http\Controllers\Api\FinancialController;
 use App\Http\Controllers\Api\FirebaseSyncController;
 use App\Http\Controllers\Api\GoalController;
+use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\SectorAverageController;
 use App\Http\Controllers\Api\SectorController;
 use App\Http\Controllers\Api\TariffController;
 use App\Http\Controllers\Api\WokwiSyncController;
@@ -23,6 +25,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
 /*
@@ -33,8 +37,6 @@ Route::prefix('auth')->group(function () {
 Route::middleware('firebase')->group(function () {
     // Auth
     Route::prefix('auth')->group(function () {
-        Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
     });
@@ -72,6 +74,7 @@ Route::middleware('firebase')->group(function () {
     Route::patch('/alerts/bulk/resolve', [AlertController::class, 'bulkResolve']);
     Route::patch('/alerts/{alert}/acknowledge', [AlertController::class, 'acknowledge']);
     Route::patch('/alerts/{alert}/resolve', [AlertController::class, 'resolve']);
+    Route::post('/alerts/{alert}/notify', [AlertController::class, 'notify']);
     Route::apiResource('alerts', AlertController::class)->only(['index', 'show']);
 
     // Metas
@@ -102,4 +105,12 @@ Route::middleware('firebase')->group(function () {
     // Firebase Sync
     Route::post('/firebase/sync', [FirebaseSyncController::class, 'sync']);
     Route::get('/firebase/preview', [FirebaseSyncController::class, 'preview']);
+
+    // Relatórios
+    Route::get('/reports/consumption-pdf', [ReportController::class, 'consumptionPdf']);
+    Route::get('/reports/consumption-data', [ReportController::class, 'consumptionData']);
+
+    // Médias de consumo por setor
+    Route::get('/sector-averages', [SectorAverageController::class, 'index']);
+    Route::put('/sector-averages', [SectorAverageController::class, 'upsert']);
 });

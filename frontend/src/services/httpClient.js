@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LumenFlow - HTTP client
  *
  * Wrapper centralizado sobre fetch. Todos os services devem passar por aqui
@@ -221,6 +221,10 @@ export const httpClient = {
 
   isApiError(error) {
     return error instanceof ApiError || (isPlainObject(error) && 'code' in error && 'status' in error);
+  },
+
+  getBaseUrl() {
+    return trimTrailingSlash(Config.API_BASE_URL).replace(/\/api$/, '');
   },
 };
 

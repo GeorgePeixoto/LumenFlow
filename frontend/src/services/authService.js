@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LumenFlow - Auth service
  *
  * Fachada inicial para endpoints de autenticacao. As telas de auth vao evoluir
@@ -36,8 +36,8 @@ export const authService = {
     return httpClient.post('/auth/forgot-password', { email });
   },
 
-  async resetPassword({ token, password } = {}) {
-    return httpClient.post('/auth/reset-password', { token, password });
+  async resetPassword({ token, email, password } = {}) {
+    return httpClient.post('/auth/reset-password', { token, email, password });
   },
 
   async logout() {

@@ -35,6 +35,8 @@ export function registerRegisterPage(Alpine) {
     showPassword: false,
     showPasswordConfirm: false,
     globalError: '',
+    cnpjLoading: false,
+    lastLookedUpCnpj: '',
 
     segments: SEGMENT_OPTIONS,
 
@@ -49,7 +51,7 @@ export function registerRegisterPage(Alpine) {
       password: false, passwordConfirm: false,
     },
 
-    // ── CNPJ Mask ───────────────────────────────────────────
+    // ── CNPJ Mask & Lookup ───────────────────────────────────
 
     onCnpjInput() {
       const d = this.cnpj.replace(/\D/g, '').slice(0, 14);
@@ -60,6 +62,62 @@ export function registerRegisterPage(Alpine) {
       else this.cnpj = `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12)}`;
 
       if (this.touched.cnpj) this.errors.cnpj = this._validateCnpj();
+
+      if (d.length === 14) {
+        this.lookupCnpj(d);
+      }
+    },
+
+    async lookupCnpj(cleanCnpj) {
+      if (this.cnpjLoading || this.lastLookedUpCnpj === cleanCnpj) return;
+      this.lastLookedUpCnpj = cleanCnpj;
+      this.cnpjLoading = true;
+      this.errors.cnpj = '';
+
+      try {
+        const res = await fetch(`https://open.cnpja.com/office/${cleanCnpj}`);
+        if (!res.ok) {
+          throw new Error('CNPJ não encontrado');
+        }
+        const data = await res.json();
+        
+        const statusText = data?.status?.text;
+        if (statusText && statusText.toLowerCase() !== 'ativa') {
+          this.errors.cnpj = `CNPJ inativo (Status: ${statusText})`;
+          return;
+        }
+
+        const officialName = data?.company?.name;
+        const alias = data?.alias;
+        this.companyName = alias || officialName || this.companyName;
+        this.errors.companyName = '';
+        this.touched.companyName = true;
+
+        if (data?.mainActivity?.text) {
+          const text = data.mainActivity.text.toLowerCase();
+          let matchedSegment = '';
+          if (text.includes('alimento') || text.includes('bebida') || text.includes('restaurante') || text.includes('supermercado')) matchedSegment = 'food_wholesale';
+          else if (text.includes('farma') || text.includes('medicamento') || text.includes('saude') || text.includes('hospital')) matchedSegment = 'pharma_wholesale';
+          else if (text.includes('constru') || text.includes('tijolo') || text.includes('cimento') || text.includes('ferrag')) matchedSegment = 'building_wholesale';
+          else if (text.includes('eletr') || text.includes('comput') || text.includes('celular') || text.includes('tecnol')) matchedSegment = 'electronics_wholesale';
+          else if (text.includes('textil') || text.includes('vestu') || text.includes('roupa') || text.includes('calca')) matchedSegment = 'textile_wholesale';
+          else if (text.includes('quimic') || text.includes('petro') || text.includes('plastico')) matchedSegment = 'chemical_wholesale';
+          else if (text.includes('agro') || text.includes('fazenda') || text.includes('cultiv') || text.includes('semen') || text.includes('fertil')) matchedSegment = 'agro_wholesale';
+          else if (text.includes('logist') || text.includes('transp') || text.includes('distrib') || text.includes('carga')) matchedSegment = 'logistics';
+          
+          if (matchedSegment) {
+            this.segment = matchedSegment;
+            this.touched.segment = true;
+            this.errors.segment = '';
+          }
+        }
+
+        this.errors.cnpj = '';
+      } catch (err) {
+        this.errors.cnpj = 'CNPJ inválido ou não encontrado na Receita Federal.';
+      } finally {
+        this.cnpjLoading = false;
+      }
     },
 
     // ── Validators ──────────────────────────────────────────
@@ -97,6 +155,12 @@ export function registerRegisterPage(Alpine) {
     onBlur(field) {
       this.touched[field] = true;
       this._validateField(field);
+      if (field === 'cnpj') {
+        const clean = this.cnpj.replace(/\D/g, '');
+        if (clean.length === 14) {
+          this.lookupCnpj(clean);
+        }
+      }
     },
 
     onInput(field) {

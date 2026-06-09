@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LumenFlow — Register Page Template (Alpine.js + Tailwind)
  */
 
@@ -83,9 +83,17 @@ export function renderRegisterPageAlpine(container) {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label for="reg-cnpj" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CNPJ</label>
-            <input id="reg-cnpj" type="text" x-model="cnpj" @input="onCnpjInput()" @blur="onBlur('cnpj')" placeholder="00.000.000/0000-00" maxlength="18"
-              :class="errors.cnpj && touched.cnpj ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-emerald-500 focus:border-emerald-500'"
-              class="w-full px-3 py-2.5 rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors" required />
+            <div class="relative">
+              <input id="reg-cnpj" type="text" x-model="cnpj" @input="onCnpjInput()" @blur="onBlur('cnpj')" placeholder="00.000.000/0000-00" maxlength="18"
+                :class="errors.cnpj && touched.cnpj ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-emerald-500 focus:border-emerald-500'"
+                class="w-full px-3 py-2.5 rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors pr-10" required />
+              <div x-show="cnpjLoading" x-cloak class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                <svg class="animate-spin h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+              </div>
+            </div>
             <p x-show="errors.cnpj && touched.cnpj" x-text="errors.cnpj" x-cloak class="mt-1 text-sm text-red-600 dark:text-red-400"></p>
           </div>
           <div>

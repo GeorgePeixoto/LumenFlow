@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LumenFlow — Reset Password Page (Alpine.js + Tailwind)
  *
  * Recebe token via query string. Campos: nova senha + confirmação.
@@ -18,14 +18,19 @@ export function registerResetPasswordPage(Alpine) {
     globalError: '',
     tokenExpired: false,
     token: '',
+    email: '',
 
     errors: { password: '', passwordConfirm: '' },
     touched: { password: false, passwordConfirm: false },
 
     init() {
-      const query = Router.currentQuery ? Router.currentQuery() : {};
-      this.token = query.token || '';
-      if (!this.token) this.tokenExpired = true;
+      // Extrair token e email da URL (ex: #/reset-password?token=xxx&email=yyy)
+      const hash = window.location.hash || '';
+      const queryPart = hash.split('?')[1] || '';
+      const params = new URLSearchParams(queryPart);
+      this.token = params.get('token') || '';
+      this.email = params.get('email') || '';
+      if (!this.token || !this.email) this.tokenExpired = true;
     },
 
     _validatePassword() {
@@ -66,7 +71,7 @@ export function registerResetPasswordPage(Alpine) {
       this.globalError = '';
 
       try {
-        await authService.resetPassword({ token: this.token, password: this.password });
+        await authService.resetPassword({ token: this.token, email: this.email, password: this.password });
         Alpine.store('toast')?.show('Senha redefinida com sucesso. Faça login.', 'success', 7000);
         Router.navigate('/login');
       } catch (err) {

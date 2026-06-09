@@ -8,38 +8,97 @@ use Illuminate\Http\Request;
 
 class BusinessHourController extends Controller
 {
+    private const DAY_MAP = [
+        'sunday' => 0,
+        'monday' => 1,
+        'tuesday' => 2,
+        'wednesday' => 3,
+        'thursday' => 4,
+        'friday' => 5,
+        'saturday' => 6,
+    ];
+
     public function index(Request $request): JsonResponse
     {
         $hours = $request->user()->businessHours()->orderBy('day_of_week')->get();
 
-        return response()->json(['business_hours' => $hours]);
+        // Converter para formato que o frontend espera
+        $days = $hours->map(function ($hour) {
+            $dayKey = array_search($hour->day_of_week, self::DAY_MAP);
+            return [
+                'day' => $dayKey ?: 'monday',
+                'day_of_week' => $hour->day_of_week,
+                'enabled' => $hour->enabled,
+                'start' => substr($hour->start_time, 0, 5), // HH:mm
+                'end' => substr($hour->end_time, 0, 5),
+            ];
+        });
+
+        return response()->json([
+            'business_hours' => $hours,
+            'days' => $days,
+        ]);
     }
 
     public function upsert(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'hours' => ['required', 'array', 'min:1', 'max:7'],
-            'hours.*.day_of_week' => ['required', 'integer', 'between:0,6'],
-            'hours.*.enabled' => ['required', 'boolean'],
-            'hours.*.start_time' => ['required', 'date_format:H:i'],
-            'hours.*.end_time' => ['required', 'date_format:H:i', 'after:hours.*.start_time'],
-        ]);
+        $data = $request->all();
+
+        // Aceitar tanto o formato { hours: [...] } quanto { days: [...] }
+        $items = $data['hours'] ?? $data['days'] ?? null;
+
+        if (!$items || !is_array($items)) {
+            return response()->json(['error' => 'Dados inválidos.'], 422);
+        }
 
         $user = $request->user();
 
-        foreach ($validated['hours'] as $hour) {
+        foreach ($items as $item) {
+            // Determinar day_of_week (aceitar número ou string)
+            $dayOfWeek = null;
+
+            if (isset($item['day_of_week'])) {
+                $dayOfWeek = (int) $item['day_of_week'];
+            } elseif (isset($item['day']) && isset(self::DAY_MAP[$item['day']])) {
+                $dayOfWeek = self::DAY_MAP[$item['day']];
+            }
+
+            if ($dayOfWeek === null || $dayOfWeek < 0 || $dayOfWeek > 6) {
+                continue;
+            }
+
+            // Aceitar tanto start_time/end_time quanto start/end
+            $startTime = $item['start_time'] ?? $item['start'] ?? '08:00';
+            $endTime = $item['end_time'] ?? $item['end'] ?? '18:00';
+            $enabled = $item['enabled'] ?? true;
+
             $user->businessHours()->updateOrCreate(
-                ['day_of_week' => $hour['day_of_week']],
+                ['day_of_week' => $dayOfWeek],
                 [
-                    'enabled' => $hour['enabled'],
-                    'start_time' => $hour['start_time'],
-                    'end_time' => $hour['end_time'],
+                    'enabled' => $enabled,
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
                 ]
             );
         }
 
         $hours = $user->businessHours()->orderBy('day_of_week')->get();
 
-        return response()->json(['business_hours' => $hours]);
+        // Retornar em ambos os formatos
+        $days = $hours->map(function ($hour) {
+            $dayKey = array_search($hour->day_of_week, self::DAY_MAP);
+            return [
+                'day' => $dayKey ?: 'monday',
+                'day_of_week' => $hour->day_of_week,
+                'enabled' => $hour->enabled,
+                'start' => substr($hour->start_time, 0, 5),
+                'end' => substr($hour->end_time, 0, 5),
+            ];
+        });
+
+        return response()->json([
+            'business_hours' => $hours,
+            'days' => $days,
+        ]);
     }
 }

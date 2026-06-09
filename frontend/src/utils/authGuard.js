@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LumenFlow — Guard de rotas (US02-F3).
  *
  * Fornece dois wrappers de rota:
@@ -53,9 +53,9 @@ async function validateRemote() {
   if (_pendingCheck) return _pendingCheck;
 
   _pendingCheck = httpClient.get('/auth/me')
-    .then((user) => {
+    .then((response) => {
       _lastRemoteCheck = Date.now();
-      if (user) sessionService.setUser(user);
+      if (response && response.user) sessionService.setUser(response.user);
       return true;
     })
     .catch(() => {

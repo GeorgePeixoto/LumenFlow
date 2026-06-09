@@ -11,6 +11,12 @@ class FirebaseAuth
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if (app()->environment('testing') && \Illuminate\Support\Facades\Auth::check()) {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            $request->setUserResolver(fn() => $user);
+            return $next($request);
+        }
+
         $header = $request->header('Authorization', '');
         $token = str_starts_with($header, 'Bearer ')
             ? substr($header, 7)

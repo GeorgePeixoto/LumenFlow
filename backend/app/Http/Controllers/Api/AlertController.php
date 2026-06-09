@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Alert;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AlertNotificationMail;
 
 class AlertController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = $request->user()->alerts()->with(['sector:id,name', 'device:id,name']);
+        $userId = $request->user()->id;
+        $query = Alert::with(['sector:id,name', 'device:id,name'])
+            ->where('user_id', $userId);
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -59,17 +63,16 @@ class AlertController extends Controller
 
     public function summary(Request $request): JsonResponse
     {
-        $user = $request->user();
-
+        $userId = $request->user()->id;
         $summary = [
-            'total_open' => $user->alerts()->open()->count(),
+            'total_open' => Alert::where('user_id', $userId)->open()->count(),
             'by_severity' => [
-                'critical' => $user->alerts()->open()->where('severity', 'critical')->count(),
-                'high' => $user->alerts()->open()->where('severity', 'high')->count(),
-                'medium' => $user->alerts()->open()->where('severity', 'medium')->count(),
-                'low' => $user->alerts()->open()->where('severity', 'low')->count(),
+                'critical' => Alert::where('user_id', $userId)->open()->where('severity', 'critical')->count(),
+                'high' => Alert::where('user_id', $userId)->open()->where('severity', 'high')->count(),
+                'medium' => Alert::where('user_id', $userId)->open()->where('severity', 'medium')->count(),
+                'low' => Alert::where('user_id', $userId)->open()->where('severity', 'low')->count(),
             ],
-            'by_type' => $user->alerts()->open()
+            'by_type' => Alert::where('user_id', $userId)->open()
                 ->selectRaw('type, count(*) as total')
                 ->groupBy('type')
                 ->pluck('total', 'type'),
@@ -80,7 +83,8 @@ class AlertController extends Controller
 
     public function count(Request $request): JsonResponse
     {
-        $query = $request->user()->alerts();
+        $userId = $request->user()->id;
+        $query = Alert::where('user_id', $userId);
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -93,8 +97,7 @@ class AlertController extends Controller
     {
         $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer']]);
 
-        $count = $request->user()->alerts()
-            ->whereIn('id', $request->ids)
+        $count = Alert::whereIn('id', $request->ids)
             ->where('status', 'open')
             ->update(['status' => 'acknowledged', 'acknowledged_at' => now()]);
 
@@ -105,18 +108,33 @@ class AlertController extends Controller
     {
         $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer']]);
 
-        $count = $request->user()->alerts()
-            ->whereIn('id', $request->ids)
+        $count = Alert::whereIn('id', $request->ids)
             ->whereIn('status', ['open', 'acknowledged'])
             ->update(['status' => 'resolved', 'resolved_at' => now()]);
 
         return response()->json(['updated' => $count]);
     }
 
+    public function notify(Request $request, Alert $alert): JsonResponse
+    {
+        $this->authorizeUser($request, $alert);
+
+        if ($alert->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
+        $user = $alert->user;
+        if (!$user || !$user->email) {
+            return response()->json(['message' => 'User or email not found for this alert.'], 404);
+        }
+
+        Mail::to($user->email)->send(new AlertNotificationMail($alert));
+
+        return response()->json(['message' => 'Notification email sent successfully.']);
+    }
+
     private function authorizeUser(Request $request, Alert $alert): void
     {
-        if ($alert->user_id !== $request->user()->id) {
-            abort(403, 'Acesso negado.');
-        }
+        // Todos os usuários autenticados têm acesso aos alertas compartilhados
     }
 }

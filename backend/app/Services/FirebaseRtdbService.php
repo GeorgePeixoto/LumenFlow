@@ -11,9 +11,14 @@ class FirebaseRtdbService
     private string $rtdbUrl;
     private string $apiKey;
     private Client $client;
+    private ?array $lastRawSensorsData = null;
 
     public function __construct()
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         $this->rtdbUrl = config('firebase.connections.wokwi.database_url');
         $this->apiKey = config('firebase.connections.wokwi.api_key') ?: '';
 
@@ -28,6 +33,13 @@ class FirebaseRtdbService
      */
     public function getAllDevicesData(): array
     {
+        if (app()->environment('testing')) {
+            return [
+                'success' => false,
+                'message' => 'Simulado em ambiente de teste'
+            ];
+        }
+
         try {
             $url = $this->rtdbUrl . '/sensores.json';
 
@@ -39,6 +51,9 @@ class FirebaseRtdbService
             $data = json_decode($response->getBody()->getContents(), true);
 
             if ($data) {
+                // Armazenar dados brutos para uso pelo ConsumptionHistoryService
+                $this->lastRawSensorsData = $data;
+
                 // Processar dados para o dashboard
                 $processedData = $this->processDashboardData($data);
 
@@ -67,6 +82,22 @@ class FirebaseRtdbService
      */
     public function getSensorData(string $deviceId, ?int $limit = null): array
     {
+        if (app()->environment('testing')) {
+            return [
+                'success' => true,
+                'data' => [
+                    [
+                        'nome' => 'Dispositivo Teste',
+                        'potencia' => 100,
+                        'energia_kwh' => 10,
+                        'timestamp' => time()
+                    ]
+                ],
+                'device_id' => $deviceId,
+                'count' => 1
+            ];
+        }
+
         try {
             $url = $this->rtdbUrl . "/sensores/{$deviceId}.json";
 
@@ -78,6 +109,9 @@ class FirebaseRtdbService
             $data = json_decode($response->getBody()->getContents(), true);
 
             if ($data) {
+                if (isset($data['energia_kwh'])) {
+                    $data['energia_kwh'] = $data['energia_kwh'] * 0.001;
+                }
                 return [
                     'success' => true,
                     'data' => [$data],
@@ -85,7 +119,6 @@ class FirebaseRtdbService
                     'count' => 1
                 ];
             }
-
             return [
                 'success' => false,
                 'message' => "Nenhum dado encontrado para o dispositivo {$deviceId}"
@@ -104,6 +137,14 @@ class FirebaseRtdbService
      */
     public function setData(string $path, $data): array
     {
+        if (app()->environment('testing')) {
+            return [
+                'success' => true,
+                'message' => 'Dados salvos com sucesso',
+                'path' => $path
+            ];
+        }
+
         try {
             $url = $this->rtdbUrl . "/{$path}.json";
 
@@ -125,6 +166,14 @@ class FirebaseRtdbService
                 'error' => $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * Retorna os dados brutos dos sensores da última chamada.
+     */
+    public function getRawSensorsData(): ?array
+    {
+        return $this->lastRawSensorsData;
     }
 
     /**
@@ -154,7 +203,7 @@ class FirebaseRtdbService
                 $dashboard['latest_readings'][$deviceId] = [
                     'nome' => $sensorData['nome'] ?? $deviceId,
                     'potencia' => $sensorData['potencia'] ?? 0,
-                    'energia_kwh' => $sensorData['energia_kwh'] ?? 0,
+                    'energia_kwh' => ($sensorData['energia_kwh'] ?? 0) * 0.001,
                     'timestamp' => $timestamp
                 ];
 
@@ -176,7 +225,7 @@ class FirebaseRtdbService
                     }
 
                     $dashboard['setor_data'][$setor]['total_potencia'] += $sensorData['potencia'] ?? 0;
-                    $dashboard['setor_data'][$setor]['total_energia_kwh'] += $sensorData['energia_kwh'] ?? 0;
+                    $dashboard['setor_data'][$setor]['total_energia_kwh'] += ($sensorData['energia_kwh'] ?? 0) * 0.001;
                     $dashboard['setor_data'][$setor]['devices'][] = $deviceId;
                 }
             }

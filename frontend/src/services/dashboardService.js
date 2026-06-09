@@ -27,6 +27,11 @@ export const dashboardService = {
     return fetchPublicData();
   },
 
+  async getAuthenticatedDashboardData() {
+    const response = await httpClient.get('/api/dashboard');
+    return response?.data || response;
+  },
+
   async getKpis() {
     const data = await fetchPublicData();
 
