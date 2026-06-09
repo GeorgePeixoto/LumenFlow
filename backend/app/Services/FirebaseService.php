@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\FirebaseHttpOptions;
 use Kreait\Firebase\Database;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Http\HttpClientOptions;
@@ -27,22 +28,8 @@ class FirebaseService
             throw new \Exception("Firebase connection '{$this->connection}' not configured.");
         }
 
-        $httpOptions = [
-            'timeout' => config('firebase.database.http_client.timeout', 30),
-            'connect_timeout' => config('firebase.database.http_client.connect_timeout', 10),
-        ];
-        $verifySetting = config('firebase.http.verify', true);
-        $caBundle = config('firebase.http.ca_bundle');
-
-        $verifyBool = filter_var($verifySetting, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-        if ($verifyBool === false) {
-            $httpOptions['verify'] = false;
-        } elseif (!empty($caBundle)) {
-            $httpOptions['verify'] = $caBundle;
-        }
-
         $clientOptions = HttpClientOptions::default()
-            ->withGuzzleConfigOptions($httpOptions);
+            ->withGuzzleConfigOptions(FirebaseHttpOptions::build());
 
         $factory = (new Factory())
             ->withHttpClientOptions($clientOptions)

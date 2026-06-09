@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\FirebaseHttpOptions;
 use Kreait\Firebase\Auth;
 use Kreait\Firebase\Exception\AuthException;
 use Kreait\Firebase\Factory;
@@ -53,22 +54,8 @@ class FirebaseAuthService
             ? explode('.', $config['storage_bucket'])[0]
             : ($config['project_id'] ?? null);
 
-        $httpOptions = [
-            'timeout' => config('firebase.database.http_client.timeout', 30),
-            'connect_timeout' => config('firebase.database.http_client.connect_timeout', 10),
-        ];
-        $verifySetting = config('firebase.http.verify', true);
-        $caBundle = config('firebase.http.ca_bundle');
-
-        $verifyBool = filter_var($verifySetting, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-        if ($verifyBool === false) {
-            $httpOptions['verify'] = false;
-        } elseif (!empty($caBundle)) {
-            $httpOptions['verify'] = $caBundle;
-        }
-
         $clientOptions = HttpClientOptions::default()
-            ->withGuzzleConfigOptions($httpOptions);
+            ->withGuzzleConfigOptions(FirebaseHttpOptions::build());
 
         $factory = (new Factory)
             ->withHttpClientOptions($clientOptions)

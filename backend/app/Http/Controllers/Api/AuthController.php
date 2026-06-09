@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\FirebaseAuthService;
+use App\Support\FirebaseHttpOptions;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Mail\ResetPasswordMail;
@@ -307,19 +308,8 @@ class AuthController extends Controller
                     'client_x509_cert_url' => null,
                 ]);
 
-            $verifySetting = config('firebase.http.verify', true);
-            $caBundle = config('firebase.http.ca_bundle');
-            $httpOptions = ['timeout' => 30, 'connect_timeout' => 10];
-
-            $verifyBool = filter_var($verifySetting, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            if ($verifyBool === false) {
-                $httpOptions['verify'] = false;
-            } elseif (!empty($caBundle)) {
-                $httpOptions['verify'] = $caBundle;
-            }
-
             $clientOptions = \Kreait\Firebase\Http\HttpClientOptions::default()
-                ->withGuzzleConfigOptions($httpOptions);
+                ->withGuzzleConfigOptions(FirebaseHttpOptions::build());
 
             $factory = $factory->withHttpClientOptions($clientOptions);
 
