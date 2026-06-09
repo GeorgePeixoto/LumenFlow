@@ -6,9 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Services\FirebaseAuthService;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Mail\ResetPasswordMail;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -66,10 +71,11 @@ class AuthController extends Controller
             'message' => 'Usuário registrado com sucesso',
             'token' => $authResult['idToken'],
             'user' => [
+                'id' => $user->id,
                 'uid' => $firebaseResult['uid'],
                 'email' => $firebaseResult['email'],
                 'name' => $displayName,
-                'company_name' => $validated['company_name'] ?? null,
+                'company_name' => $user->company_name,
             ]
         ], 201);
     }
@@ -95,13 +101,18 @@ class AuthController extends Controller
         // Armazenar token na sessão
         session(['firebase_token' => $authResult['idToken']]);
 
+        $dbUser = User::where('email', $authResult['email'])->first();
+
         return response()->json([
             'success' => true,
             'message' => 'Login realizado com sucesso',
             'token' => $authResult['idToken'],
             'user' => [
+                'id' => $dbUser ? $dbUser->id : null,
                 'uid' => $authResult['uid'],
-                'email' => $authResult['email']
+                'email' => $authResult['email'],
+                'name' => $dbUser ? $dbUser->name : null,
+                'company_name' => $dbUser ? $dbUser->company_name : null,
             ]
         ]);
     }
@@ -127,38 +138,36 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * GET /api/auth/me
-     */
     public function me(Request $request): JsonResponse
     {
-        $token = $request->header('Authorization');
+        $user = $request->user();
 
-        if (!$token) {
+        if (!$user) {
             return response()->json([
                 'success' => false,
-                'error' => 'Token não fornecido'
+                'error' => 'Usuário não autenticado'
             ], 401);
         }
 
-        $token = str_replace('Bearer ', '', $token);
-        $verifyResult = $this->firebaseAuthService->verifyToken($token);
-
-        if (!$verifyResult['success']) {
-            return response()->json([
-                'success' => false,
-                'error' => $verifyResult['error']
-            ], 401);
-        }
+        $firebaseUser = $request->attributes->get('firebase_user');
 
         return response()->json([
             'success' => true,
-            'user' => $verifyResult
+            'user' => [
+                'id' => $user->id,
+                'uid' => $firebaseUser['uid'] ?? ('fake-uid-' . md5($user->email)),
+                'email' => $user->email,
+                'name' => $user->name,
+                'company_name' => $user->company_name,
+            ]
         ]);
     }
 
     /**
      * POST /api/auth/forgot-password
+     *
+     * Gera token UUID, salva no banco, envia e-mail via SMTP (MailHog em dev).
+     * Sempre retorna sucesso (prevenção de user enumeration).
      */
     public function forgotPassword(Request $request): JsonResponse
     {
@@ -166,37 +175,163 @@ class AuthController extends Controller
             'email' => ['required', 'string', 'email'],
         ]);
 
-        // Enviar link de redefinição via Firebase
-        // Firebase não tem endpoint direto para isso, precisa ser via console ou email templates
+        $email = strtolower(trim($request->email));
+
+        // Buscar usuário no banco local
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            // Remover tokens antigos para este e-mail
+            DB::table('password_resets')->where('email', $email)->delete();
+
+            // Gerar novo token UUID
+            $token = Str::uuid()->toString();
+
+            // Salvar na tabela password_resets
+            DB::table('password_resets')->insert([
+                'email' => $email,
+                'token' => $token,
+                'created_at' => now(),
+            ]);
+
+            // Enviar e-mail
+            try {
+                Mail::to($email)->send(new ResetPasswordMail($email, $token, $user->name));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Erro ao enviar e-mail de recuperação: ' . $e->getMessage());
+            }
+        }
+
+        // Sempre retorna sucesso (não revelar se e-mail existe ou não)
         return response()->json([
-            'message' => 'Por favor, verifique seu e-mail para redefinir a senha.',
+            'success' => true,
+            'message' => 'Se o e-mail estiver cadastrado, você receberá um link de recuperação em instantes.',
         ]);
     }
 
     /**
      * POST /api/auth/reset-password
+     *
+     * Valida token, atualiza senha no Firebase Auth e no banco local.
      */
     public function resetPassword(Request $request): JsonResponse
     {
         $request->validate([
-            'idToken' => ['required', 'string'],
-            'newPassword' => ['required', 'string', 'min:8'],
+            'token' => ['required', 'string'],
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string', 'min:8'],
         ]);
 
-        $result = $this->firebaseAuthService->changePassword(
-            $request->idToken,
-            $request->newPassword
-        );
+        $email = strtolower(trim($request->email));
+        $token = $request->token;
+        $newPassword = $request->password;
 
-        if (!$result['success']) {
+        // Buscar token no banco
+        $resetRecord = DB::table('password_resets')
+            ->where('email', $email)
+            ->where('token', $token)
+            ->first();
+
+        if (!$resetRecord) {
             throw ValidationException::withMessages([
-                'password' => [$result['error']],
+                'token' => ['Token inválido ou expirado.'],
             ]);
         }
+
+        // Verificar expiração (1 hora)
+        $createdAt = \Carbon\Carbon::parse($resetRecord->created_at);
+        if ($createdAt->addHour()->isPast()) {
+            DB::table('password_resets')->where('email', $email)->delete();
+
+            throw ValidationException::withMessages([
+                'token' => ['Token expirado. Solicite um novo link de recuperação.'],
+            ]);
+        }
+
+        // Buscar usuário local
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'email' => ['Usuário não encontrado.'],
+            ]);
+        }
+
+        // Atualizar senha no Firebase Auth
+        try {
+            // Encontrar o UID do Firebase pelo email
+            $firebaseAuth = app(FirebaseAuthService::class);
+
+            // Precisamos usar o Admin SDK para buscar o usuário por email e atualizar
+            // Vamos usar a abordagem de buscar pelo email no Firebase
+            $this->updateFirebasePassword($email, $newPassword);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Erro ao atualizar senha no Firebase: ' . $e->getMessage());
+            // Continuar mesmo se Firebase falhar — pelo menos atualizar local
+        }
+
+        // Atualizar senha local
+        $user->update([
+            'password' => bcrypt($newPassword),
+        ]);
+
+        // Remover token utilizado
+        DB::table('password_resets')->where('email', $email)->delete();
 
         return response()->json([
             'success' => true,
             'message' => 'Senha redefinida com sucesso.',
         ]);
+    }
+
+    /**
+     * Atualiza a senha do usuário no Firebase Auth usando Admin SDK.
+     */
+    private function updateFirebasePassword(string $email, string $newPassword): void
+    {
+        try {
+            $config = config('firebase.connections.auth');
+
+            $factory = (new \Kreait\Firebase\Factory)
+                ->withServiceAccount([
+                    'type' => 'service_account',
+                    'project_id' => !empty($config['storage_bucket'])
+                        ? explode('.', $config['storage_bucket'])[0]
+                        : ($config['project_id'] ?? null),
+                    'private_key_id' => null,
+                    'private_key' => $config['private_key'],
+                    'client_email' => $config['client_email'],
+                    'client_id' => null,
+                    'auth_uri' => null,
+                    'token_uri' => null,
+                    'auth_provider_x509_cert_url' => null,
+                    'client_x509_cert_url' => null,
+                ]);
+
+            $verifySetting = config('firebase.http.verify', true);
+            $caBundle = config('firebase.http.ca_bundle');
+            $httpOptions = ['timeout' => 30, 'connect_timeout' => 10];
+
+            $verifyBool = filter_var($verifySetting, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($verifyBool === false) {
+                $httpOptions['verify'] = false;
+            } elseif (!empty($caBundle)) {
+                $httpOptions['verify'] = $caBundle;
+            }
+
+            $clientOptions = \Kreait\Firebase\Http\HttpClientOptions::default()
+                ->withGuzzleConfigOptions($httpOptions);
+
+            $factory = $factory->withHttpClientOptions($clientOptions);
+
+            $auth = $factory->createAuth();
+
+            // Buscar usuário pelo e-mail
+            $firebaseUser = $auth->getUserByEmail($email);
+
+            // Atualizar senha
+            $auth->updateUser($firebaseUser->uid, ['password' => $newPassword]);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }

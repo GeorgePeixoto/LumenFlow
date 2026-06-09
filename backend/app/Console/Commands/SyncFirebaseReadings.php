@@ -31,19 +31,14 @@ class SyncFirebaseReadings extends Command
 
         // Detecção automática de alertas
         if (!$this->option('no-alerts') && $result['synced'] > 0) {
-            $this->info("[{$timestamp}] Executando detecção de alertas...");
+            $this->info("[{$timestamp}] Executando detecção de alertas global...");
 
-            $users = User::all();
+            $user = User::first();
             $totalAlerts = 0;
 
-            foreach ($users as $user) {
+            if ($user) {
                 $alerts = $alertService->detectAll($user);
-                $userTotal = array_sum($alerts);
-                $totalAlerts += $userTotal;
-
-                if ($userTotal > 0) {
-                    $this->line("  User {$user->email}: {$userTotal} alertas gerados");
-                }
+                $totalAlerts = array_sum($alerts);
             }
 
             $this->info("[{$timestamp}] Detecção concluída: {$totalAlerts} alertas gerados.");

@@ -145,7 +145,7 @@ export function renderFinancialPageAlpine(container) {
       </div>
       <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
         <p class="text-sm text-gray-500 dark:text-gray-400">Consumo total</p>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="(summary?.total_kwh || 0).toFixed(1) + ' kWh'"></p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="(summary?.total_kwh || 0).toFixed(3) + ' KWh'"></p>
       </div>
       <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
         <p class="text-sm text-gray-500 dark:text-gray-400">Custo médio/kWh</p>
@@ -176,10 +176,10 @@ export function renderFinancialPageAlpine(container) {
       <div x-show="daily.length === 0" class="text-center py-6 text-gray-500 dark:text-gray-400">Sem dados.</div>
       <div x-show="daily.length > 0" class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead><tr><th class="text-left py-2 text-gray-500 dark:text-gray-400">Data</th><th class="text-right py-2 text-gray-500 dark:text-gray-400">kWh</th><th class="text-right py-2 text-gray-500 dark:text-gray-400">Custo</th></tr></thead>
+          <thead><tr><th class="text-left py-2 text-gray-500 dark:text-gray-400">Data</th><th class="text-right py-2 text-gray-500 dark:text-gray-400">KWh</th><th class="text-right py-2 text-gray-500 dark:text-gray-400">Custo</th></tr></thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
             <template x-for="row in daily" :key="row.date">
-              <tr><td class="py-2 text-gray-700 dark:text-gray-300" x-text="formatDate(row.date)"></td><td class="py-2 text-right text-gray-700 dark:text-gray-300" x-text="(row.kwh || 0).toFixed(1)"></td><td class="py-2 text-right font-medium text-gray-900 dark:text-white" x-text="formatCurrency(row.cost)"></td></tr>
+              <tr><td class="py-2 text-gray-700 dark:text-gray-300" x-text="formatDate(row.date)"></td><td class="py-2 text-right text-gray-700 dark:text-gray-300" x-text="(row.kwh || 0).toFixed(3)"></td><td class="py-2 text-right font-medium text-gray-900 dark:text-white" x-text="formatCurrency(row.cost)"></td></tr>
             </template>
           </tbody>
         </table>

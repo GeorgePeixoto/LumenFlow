@@ -48,7 +48,7 @@ function getDashboardHTML() {
 
   <!-- KPI Cards — large, elegant, 2x2 on mobile, 4 on lg -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-    ${bigKpiCard('consumption', 'Consumo', 'W', 'bolt', '#/financial')}
+    ${bigKpiCard('consumption', 'Consumo', 'KWh', 'bolt', '#/financial')}
     ${bigKpiCard('cost', 'Custo', 'R$', 'dollar', '#/financial')}
     ${bigKpiCard('alerts', 'Alertas', '', 'bell', '#/alerts')}
     ${bigKpiCard('devices', 'Dispositivos', '', 'device', '#/devices')}
@@ -71,8 +71,8 @@ function getDashboardHTML() {
         <p class="text-white font-bold text-xl" x-text="formatPower(selectedSector?.potencia)"></p>
       </div>
       <div class="bg-white/10 rounded-xl p-4">
-        <p class="text-emerald-100 text-xs font-medium mb-1">Energia atual</p>
-        <p class="text-white font-bold text-xl" x-text="(selectedSector?.energia_kwh || 0).toFixed(2) + ' W'"></p>
+        <p class="text-emerald-100 text-xs font-medium mb-1">Previsão com base na potência atual</p>
+        <p class="text-white font-bold text-xl" x-text="formatSectorEnergy((selectedSector?.potencia || 0) / 1000)"></p>
       </div>
     </div>
   </div>
@@ -108,8 +108,20 @@ function bigKpiCard(key, title, unit, icon, href) {
   };
   const accent = accentColors[key];
 
+  // For the alerts card, add a pulse/badge when increased
+  const isAlerts = key === 'alerts';
+
   return `
-    <a href="${href}" class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 block group">
+    <a href="${href}" :class="{ 'ring-2 ring-amber-400 ring-offset-2 dark:ring-offset-gray-900': ${isAlerts} && kpis.${key}.increased }"
+       class="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 block group">
+      ${isAlerts ? `
+      <!-- New alert pulse indicator -->
+      <span x-show="kpis.${key}.increased" x-cloak
+            class="absolute top-3 right-3 flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+      </span>
+      ` : ''}
       <!-- Icon badge -->
       <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl ${accent.bg} border ${accent.border} mb-4">
         <svg class="w-6 h-6 ${accent.icon}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${icons[icon]}</svg>
@@ -120,12 +132,14 @@ function bigKpiCard(key, title, unit, icon, href) {
       <div x-show="kpis.${key}.loading" class="h-9 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
       <!-- Value -->
       <div x-show="!kpis.${key}.loading" x-cloak class="flex items-baseline gap-2">
-        <span class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight" x-text="kpis.${key}.value"></span>
+        <span :class="${isAlerts} && kpis.${key}.value !== '0' ? 'text-amber-500' : 'text-gray-900 dark:text-white'"
+              class="text-3xl font-bold tracking-tight" x-text="kpis.${key}.value"></span>
         ${unit ? `<span class="text-base text-gray-400 dark:text-gray-500 font-medium">${unit}</span>` : ''}
       </div>
     </a>
   `;
 }
+
 
 function quickActionHTML(label, href, icon) {
   const icons = {

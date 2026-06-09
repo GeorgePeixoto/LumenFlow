@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LumenFlow — Alert Service (US17)
  */
 import { httpClient } from './httpClient.js';
@@ -32,5 +32,9 @@ export const alertService = {
 
   async getCount({ status = 'open' } = {}) {
     return httpClient.get('/api/alerts/count', { query: { status } });
+  },
+
+  async notify(id) {
+    return httpClient.post(`/api/alerts/${encodeURIComponent(id)}/notify`);
   },
 };

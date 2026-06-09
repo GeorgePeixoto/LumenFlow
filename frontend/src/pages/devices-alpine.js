@@ -54,7 +54,7 @@ export function registerDevicesPage(Alpine) {
 
     formatEnergy(kwh) {
       if (kwh == null) return '—';
-      return kwh.toFixed(2) + ' kWh';
+      return kwh.toFixed(3) + ' KWh';
     },
   }));
 }

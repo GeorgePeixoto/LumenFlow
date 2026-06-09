@@ -6,6 +6,7 @@
  */
 
 import { dashboardService } from '../services/dashboardService.js';
+import { alertService } from '../services/alertService.js';
 import { sessionService } from '../services/sessionService.js';
 import { formatKwh, formatCurrency } from '../utils/formatters.js';
 import Router from '../utils/router.js';
@@ -18,9 +19,9 @@ export function registerDashboardPage(Alpine) {
     // ── KPIs ────────────────────────────────────────────────
     kpis: {
       consumption: { value: '—', unit: 'kWh', loading: true },
-      cost:        { value: '—', unit: 'R$',  loading: true },
-      alerts:      { value: '0', loading: false },
-      devices:     { value: '—', loading: true },
+      cost: { value: '—', unit: 'R$', loading: true },
+      alerts: { value: '0', loading: false },
+      devices: { value: '—', loading: true },
     },
 
     accumulatedKwh: 0,
@@ -52,7 +53,7 @@ export function registerDashboardPage(Alpine) {
       try {
         const stored = localStorage.getItem(SELECTED_SECTOR_KEY);
         if (stored) this.selectedSector = JSON.parse(stored);
-      } catch (_) {}
+      } catch (_) { }
 
       this.loadKpis();
       this._interval = setInterval(() => this.loadKpis(), 10000);
@@ -66,7 +67,12 @@ export function registerDashboardPage(Alpine) {
 
     async loadKpis() {
       try {
-        const data = await dashboardService.getPublicData();
+        // ── Firebase data + alert count (parallel) ───────────
+        const [data, countData] = await Promise.all([
+          dashboardService.getPublicData(),
+          alertService.getCount({ status: 'open' }).catch(() => ({ count: 0 })),
+        ]);
+
         const readings = data?.latest_readings || {};
         const total_devices = data?.total_devices || 0;
 
@@ -87,49 +93,28 @@ export function registerDashboardPage(Alpine) {
         const isFirstLoad = !this.previousReadings || Object.keys(this.previousReadings).length === 0;
 
         if (isFirstLoad) {
-          this.previousReadings = {};
-          if (this.selectedSector) {
-            if (hasSelectedSectorData) {
-              const val = selectedSectorReading.energia_kwh || 0;
-              this.accumulatedKwh = val;
-              this.previousReadings[this.selectedSector.id || selectedSectorReading.nome] = val;
-            } else {
-              this.accumulatedKwh = 0;
-            }
-          } else {
-            let total = 0;
-            for (const [key, reading] of Object.entries(readings)) {
-              const val = reading.energia_kwh || 0;
-              total += val;
-              this.previousReadings[key] = val;
-            }
-            this.accumulatedKwh = total;
+          this.previousReadings = { _initialized: true };
+        }
+
+        const consumptionCards = data?.consumption_cards || {};
+        let accumulatedKwh = 0;
+        let cost = 0;
+
+        if (this.selectedSector) {
+          const sectorKey = this.selectedSector.id;
+          const card = consumptionCards[sectorKey];
+          if (card) {
+            accumulatedKwh = card.kwh || 0;
+            cost = card.cost || 0;
           }
         } else {
-          // Cargas subsequentes: acumula valor bruto ao detectar mudança
-          if (this.selectedSector) {
-            if (hasSelectedSectorData) {
-              const sectorKey = this.selectedSector.id || selectedSectorReading.nome;
-              const prev = this.previousReadings[sectorKey] ?? null;
-              const current = selectedSectorReading.energia_kwh || 0;
-
-              if (prev !== null && current !== prev) {
-                this.accumulatedKwh += current;
-              }
-              this.previousReadings[sectorKey] = current;
-            }
-          } else {
-            for (const [key, reading] of Object.entries(readings)) {
-              const prev = this.previousReadings[key] ?? null;
-              const current = reading.energia_kwh || 0;
-
-              if (prev !== null && current !== prev) {
-                this.accumulatedKwh += current;
-              }
-              this.previousReadings[key] = current;
-            }
+          for (const card of Object.values(consumptionCards)) {
+            accumulatedKwh += card.kwh || 0;
+            cost += card.cost || 0;
           }
         }
+
+        this.accumulatedKwh = accumulatedKwh;
 
         // Atualizar setor selecionado com dados brutos para o card monitorado
         if (this.selectedSector && hasSelectedSectorData) {
@@ -140,11 +125,10 @@ export function registerDashboardPage(Alpine) {
           };
         }
 
-        const cost = this.accumulatedKwh * TARIFA;
-
+        const kwhTruncated = Math.floor(this.accumulatedKwh * 1000) / 1000;
         this.kpis.consumption = {
-          value: formatKwh(this.accumulatedKwh, 2).replace(' kWh', ''),
-          unit: 'kWh',
+          value: formatKwh(kwhTruncated, 3).replace(' kWh', ''),
+          unit: 'KWh',
           loading: false,
         };
         this.kpis.cost = {
@@ -156,7 +140,22 @@ export function registerDashboardPage(Alpine) {
           value: String(total_devices),
           loading: false,
         };
-        this.kpis.alerts = { value: '0', loading: false };
+
+        // ── Alertas: total abertos buscado do backend ─────────
+        const prevAlertCount = parseInt(this.kpis.alerts.value, 10) || 0;
+        const newAlertCount = countData?.count ?? 0;
+        const alertsIncreased = newAlertCount > prevAlertCount;
+        this.kpis.alerts = { value: String(newAlertCount), loading: false, increased: alertsIncreased };
+
+        // Toast de notificação quando novos alertas chegam
+        if (alertsIncreased && !isFirstLoad) {
+          const diff = newAlertCount - prevAlertCount;
+          const msg = diff === 1
+            ? '⚠️ Novo alerta recebido!'
+            : `⚠️ ${diff} novos alertas recebidos!`;
+          Alpine.store('toast')?.show(msg, 'warning', 5000);
+        }
+
         this.lastUpdate = new Date();
       } catch (_) {
         Object.keys(this.kpis).forEach(k => {
@@ -177,9 +176,15 @@ export function registerDashboardPage(Alpine) {
 
     // ── Formatters ──────────────────────────────────────────
 
+    formatSectorEnergy(val) {
+      if (val == null) return '—';
+      const kwhTruncated = Math.floor(val * 1000) / 1000;
+      return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(kwhTruncated) + ' KWh';
+    },
+
     formatPower(w) {
       if (w == null) return '—';
-      return w >= 1000 ? (w / 1000).toFixed(2) + ' kW' : w.toFixed(1) + ' W';
+      return w >= 1000 ? (w / 1000).toFixed(2) + ' W' : w.toFixed(1) + ' W';
     },
 
     formatTime() {

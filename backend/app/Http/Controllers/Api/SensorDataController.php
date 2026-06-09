@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\ConsumptionHistoryService;
 use App\Services\FirebaseRtdbService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,10 +11,14 @@ use Illuminate\Http\Request;
 class SensorDataController extends Controller
 {
     protected $firebaseRtdbService;
+    protected $consumptionHistoryService;
 
-    public function __construct(FirebaseRtdbService $firebaseRtdbService)
-    {
+    public function __construct(
+        FirebaseRtdbService $firebaseRtdbService,
+        ConsumptionHistoryService $consumptionHistoryService
+    ) {
         $this->firebaseRtdbService = $firebaseRtdbService;
+        $this->consumptionHistoryService = $consumptionHistoryService;
     }
 
     /**
@@ -38,7 +43,8 @@ class SensorDataController extends Controller
 
     /**
      * GET /api/dashboard/public
-     * Obtém dados agregados para o dashboard (público)
+     * Obtém dados agregados para o dashboard (público).
+     * Também grava histórico de consumo quando há mudanças nos dados.
      */
     public function getDashboard(): JsonResponse
     {
@@ -47,9 +53,24 @@ class SensorDataController extends Controller
         if (!$result['success']) {
             return response()->json([
                 'success' => false,
-                'error' => $result['message']
+                'error' => $result['message'] ?? $result['error'] ?? 'Erro desconhecido'
             ], 404);
         }
+
+        // Gravar histórico de consumo se houve mudanças (transação atômica)
+        // Os dados brutos do Firebase estão disponíveis nos devices listados
+        try {
+            $rawSensorsData = $this->firebaseRtdbService->getRawSensorsData();
+            if ($rawSensorsData) {
+                $this->consumptionHistoryService->recordIfChanged($rawSensorsData);
+                $this->updateConsumptionCards($rawSensorsData);
+            }
+        } catch (\Exception $e) {
+            // Não falhar o endpoint por causa de erro no histórico
+            \Illuminate\Support\Facades\Log::warning('History or card recording failed: ' . $e->getMessage());
+        }
+
+        $result['data']['consumption_cards'] = $this->getConsumptionCards();
 
         return response()->json($result);
     }
@@ -65,9 +86,11 @@ class SensorDataController extends Controller
         if (!$result['success']) {
             return response()->json([
                 'success' => false,
-                'error' => $result['message']
+                'error' => $result['message'] ?? $result['error'] ?? 'Erro desconhecido'
             ], 404);
         }
+
+        $result['data']['consumption_cards'] = $this->getConsumptionCards();
 
         // Adicionar informações do usuário autenticado
         $user = auth()->user();
@@ -78,6 +101,50 @@ class SensorDataController extends Controller
         ];
 
         return response()->json($result);
+    }
+
+    /**
+     * Atualiza os cards de consumo persistidos no banco de dados.
+     */
+    private function updateConsumptionCards(array $sensorsData): void
+    {
+        $tariff = 0.85; // R$/kWh
+
+        foreach ($sensorsData as $deviceId => $sensorData) {
+            if (!$sensorData || !is_array($sensorData)) {
+                continue;
+            }
+
+            $powerW = $sensorData['potencia'] ?? 0;
+            $incrementKwh = (float)$powerW / 1000000;
+            $incrementCost = $incrementKwh * $tariff;
+
+            // Encontrar ou criar o card para o device/setor
+            $card = \App\Models\ConsumptionCard::firstOrCreate(
+                ['key' => $deviceId],
+                ['accumulated_kwh' => 0, 'accumulated_cost' => 0]
+            );
+
+            $card->accumulated_kwh = (float)$card->accumulated_kwh + $incrementKwh;
+            $card->accumulated_cost = (float)$card->accumulated_cost + $incrementCost;
+            $card->save();
+        }
+    }
+
+    /**
+     * Obtém todos os cards de consumo persistidos.
+     */
+    private function getConsumptionCards(): array
+    {
+        return \App\Models\ConsumptionCard::all()
+            ->keyBy('key')
+            ->map(function ($card) {
+                return [
+                    'kwh' => (float)$card->accumulated_kwh,
+                    'cost' => (float)$card->accumulated_cost,
+                ];
+            })
+            ->toArray();
     }
 
     /**

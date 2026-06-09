@@ -138,7 +138,7 @@ export function renderTransparencyPageAlpine(container) {
           </div>
 
           <h3 class="font-semibold text-gray-900 dark:text-white text-lg" x-text="sector.name"></h3>
-          <p class="text-2xl font-bold mt-2" :class="statusConfig(sector.status).text" x-text="sector.consumption.toFixed(2) + ' W'"></p>
+          <p class="text-2xl font-bold mt-2" :class="statusConfig(sector.status).text" x-text="sector.consumption.toFixed(3) + ' KWh'"></p>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" x-text="formatPower(sector.potencia)"></p>
           <p class="text-sm mt-1 font-medium" :class="statusConfig(sector.status).text" x-text="statusConfig(sector.status).label"></p>
         </div>
