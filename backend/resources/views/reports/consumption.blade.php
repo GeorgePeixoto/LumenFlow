@@ -159,7 +159,7 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Data/Hora</th>
+                    <th>{{ $grouping === 'daily' ? 'Data' : 'Data/Hora' }}</th>
                     <th>Potência (W)</th>
                     <th>Energia (kWh)</th>
                     <th>Custo (R$)</th>
@@ -169,7 +169,7 @@
             <tbody>
                 @foreach($records as $record)
                 <tr>
-                    <td>{{ \Carbon\Carbon::parse($record->recorded_at)->format('d/m/Y H:i') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($record->recorded_at)->format($grouping === 'daily' ? 'd/m/Y' : 'd/m/Y H:i') }}</td>
                     <td class="text-right">{{ number_format($record->power_w, 2, ',', '.') }}</td>
                     <td class="text-right">{{ number_format($record->energy_kwh, 4, ',', '.') }}</td>
                     <td class="text-right">R$ {{ number_format($record->cost_estimate, 2, ',', '.') }}</td>

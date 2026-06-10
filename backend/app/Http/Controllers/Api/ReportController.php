@@ -32,21 +32,59 @@ class ReportController extends Controller
         $dateFrom = $request->query('date_from');
         $dateTo = $request->query('date_to');
 
-        // Buscar registros do histórico
-        $records = ConsumptionHistory::where('sector_name', $sectorName)
-            ->whereBetween('recorded_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-            ->orderBy('recorded_at', 'asc')
-            ->get();
+        // 1. Calcular totais usando agregação direta no banco (previne estouro de memória PHP)
+        $totalsQuery = ConsumptionHistory::where('sector_name', $sectorName)
+            ->whereBetween('recorded_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59']);
 
-        // Calcular totais
-        $totalKwh = $records->sum('energy_kwh');
-        $totalCost = $records->sum('cost_estimate');
-        $avgPower = $records->avg('power_w') ?? 0;
-        $maxPower = $records->max('power_w') ?? 0;
-        $avgTariff = $records->avg('tariff_used') ?? 0.85;
+        $totalRecords = (clone $totalsQuery)->count();
+        $totalKwh = (clone $totalsQuery)->sum('energy_kwh') ?? 0;
+        $totalCost = (clone $totalsQuery)->sum('cost_estimate') ?? 0;
+        $avgPower = (clone $totalsQuery)->avg('power_w') ?? 0;
+        $maxPower = (clone $totalsQuery)->max('power_w') ?? 0;
+        $avgTariff = (clone $totalsQuery)->avg('tariff_used') ?? 0.85;
 
-        // Obter label legível do setor
-        $sectorLabel = $records->first()?->sector_label ?? $sectorName;
+        // Obter o primeiro registro para rotular o setor
+        $firstRecord = (clone $totalsQuery)->orderBy('recorded_at', 'asc')->first();
+        $sectorLabel = $firstRecord?->sector_label ?? $sectorName;
+
+        // 2. Definir o agrupamento de acordo com o intervalo de dias
+        $daysCount = \Carbon\Carbon::parse($dateFrom)->diffInDays(\Carbon\Carbon::parse($dateTo)) + 1;
+        $grouping = 'none';
+
+        if ($daysCount > 7) {
+            $grouping = 'daily';
+            $records = ConsumptionHistory::where('sector_name', $sectorName)
+                ->whereBetween('recorded_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                ->selectRaw("
+                    strftime('%Y-%m-%d 00:00:00', recorded_at) as recorded_at,
+                    AVG(power_w) as power_w,
+                    SUM(energy_kwh) as energy_kwh,
+                    SUM(cost_estimate) as cost_estimate,
+                    AVG(tariff_used) as tariff_used
+                ")
+                ->groupByRaw("strftime('%Y-%m-%d', recorded_at)")
+                ->orderBy('recorded_at', 'asc')
+                ->get();
+        } elseif ($daysCount > 1) {
+            $grouping = 'hourly';
+            $records = ConsumptionHistory::where('sector_name', $sectorName)
+                ->whereBetween('recorded_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                ->selectRaw("
+                    strftime('%Y-%m-%d %H:00:00', recorded_at) as recorded_at,
+                    AVG(power_w) as power_w,
+                    SUM(energy_kwh) as energy_kwh,
+                    SUM(cost_estimate) as cost_estimate,
+                    AVG(tariff_used) as tariff_used
+                ")
+                ->groupByRaw("strftime('%Y-%m-%d %H', recorded_at)")
+                ->orderBy('recorded_at', 'asc')
+                ->get();
+        } else {
+            $records = ConsumptionHistory::where('sector_name', $sectorName)
+                ->whereBetween('recorded_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                ->orderBy('recorded_at', 'asc')
+                ->get();
+        }
 
         $data = [
             'sectorName' => $sectorName,
@@ -55,12 +93,13 @@ class ReportController extends Controller
             'dateTo' => \Carbon\Carbon::parse($dateTo)->format('d/m/Y'),
             'generatedAt' => now()->format('d/m/Y H:i'),
             'records' => $records,
-            'totalRecords' => $records->count(),
+            'totalRecords' => $totalRecords,
             'totalKwh' => $totalKwh,
             'totalCost' => $totalCost,
             'avgPower' => $avgPower,
             'maxPower' => $maxPower,
             'avgTariff' => $avgTariff,
+            'grouping' => $grouping,
         ];
 
         $pdf = Pdf::loadView('reports.consumption', $data);
@@ -70,6 +109,7 @@ class ReportController extends Controller
 
         return $pdf->download($filename);
     }
+
 
     /**
      * GET /api/reports/consumption-data

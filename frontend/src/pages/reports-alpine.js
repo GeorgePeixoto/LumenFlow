@@ -97,38 +97,27 @@ export function registerReportsPage(Alpine) {
           sector_name: this.selectedSector,
           date_from: this.dateFrom,
           date_to: this.dateTo,
+          token: token,
         });
 
-        const url = `${baseUrl}/api/reports/consumption-pdf?${params.toString()}`;
+        const downloadUrl = `${baseUrl}/api/reports/consumption-pdf?${params.toString()}`;
 
-        // Usar fetch direto para download de arquivo binário
-        const response = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/pdf',
-          },
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => null);
-          throw new Error(errData?.message || `Erro ${response.status}`);
-        }
-
-        const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
+        // Disparar o download de forma nativa via elemento <a>
         const a = document.createElement('a');
         a.href = downloadUrl;
         a.download = `relatorio_consumo_${this.selectedSector}_${this.dateFrom}_${this.dateTo}.pdf`;
         document.body.appendChild(a);
         a.click();
         a.remove();
-        window.URL.revokeObjectURL(downloadUrl);
 
-        Alpine.store('toast')?.show('PDF gerado com sucesso!', 'success');
+        // Breve delay visual para dar feedback ao usuário
+        setTimeout(() => {
+          this.generating = false;
+          Alpine.store('toast')?.show('PDF gerado com sucesso!', 'success');
+        }, 1000);
       } catch (err) {
         this.error = err?.message || 'Erro ao gerar PDF.';
         Alpine.store('toast')?.show(this.error, 'error');
-      } finally {
         this.generating = false;
       }
     },

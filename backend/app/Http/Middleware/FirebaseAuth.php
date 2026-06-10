@@ -18,9 +18,13 @@ class FirebaseAuth
         }
 
         $header = $request->header('Authorization', '');
-        $token = str_starts_with($header, 'Bearer ')
-            ? substr($header, 7)
-            : null;
+        $token = null;
+
+        if (str_starts_with($header, 'Bearer ')) {
+            $token = substr($header, 7);
+        } else {
+            $token = $request->query('token') ?: $request->input('token');
+        }
 
         if (!$token) {
             return response()->json([
