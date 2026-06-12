@@ -313,8 +313,10 @@ class AuthController extends Controller
             $verifyBool = filter_var($verifySetting, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
             if ($verifyBool === false) {
                 $httpOptions['verify'] = false;
-            } elseif (!empty($caBundle)) {
+            } elseif (!empty($caBundle) && is_string($caBundle) && file_exists($caBundle)) {
                 $httpOptions['verify'] = $caBundle;
+            } elseif (!empty($caBundle)) {
+                \Illuminate\Support\Facades\Log::warning('Ignorando FIREBASE_HTTP_CA_BUNDLE inválido: ' . $caBundle);
             }
 
             $clientOptions = \Kreait\Firebase\Http\HttpClientOptions::default()

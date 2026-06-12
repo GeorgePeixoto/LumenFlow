@@ -63,8 +63,10 @@ class FirebaseAuthService
         $verifyBool = filter_var($verifySetting, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         if ($verifyBool === false) {
             $httpOptions['verify'] = false;
-        } elseif (!empty($caBundle)) {
+        } elseif (!empty($caBundle) && is_string($caBundle) && file_exists($caBundle)) {
             $httpOptions['verify'] = $caBundle;
+        } elseif (!empty($caBundle)) {
+            Log::warning('Ignorando FIREBASE_HTTP_CA_BUNDLE inválido: ' . $caBundle);
         }
 
         $clientOptions = HttpClientOptions::default()
